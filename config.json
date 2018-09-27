@@ -1,0 +1,31 @@
+{
+  "css": "clang++",
+  "cxxflags": ["-std=c++17", "-fPIC", "-Wall", "-Wpedantic", "--static"],
+  "link": "",
+  "source": "src",
+  "include_dir": "include",
+  "build": "build",
+  "fem": {
+    "path": "{{root}}/fem.exe",
+    "files": "{{source}}/main.cpp",
+    "type": "exe",
+    "dep": [
+      "libfem.a"
+    ]
+  },
+  "libfem.a": {
+    "path": "{{build}}/libfem.a",
+    "files": "{{source}}/*.cpp",
+    "files_exclude": "{{source}}/main.cpp",
+    "type": "lib",
+    "join": true,
+    "dep": [
+      "libpng.a"
+    ]
+  },
+  "libpng.a": {
+    "path": "{{build}}/libpng.a",
+    "source": "libpng",
+    "type": "aumake"
+  }
+}
