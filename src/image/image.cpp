@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <future>
 #include <string>
 #include <vector>
 
@@ -9,26 +10,10 @@
 
 #include <iostream>
 
-fem::image::Image::Image() : width_(0), height_(0) {}
-fem::image::Image::Image(std::size_t width, std::size_t height)
-    : width_(width),
-      height_(height),
-      frame_buffer_(width_, std::vector<uint32_t>(height_, 0)) {}
-fem::image::Image::Image(const Image& copy)
-    : width_(copy.width_),
-      height_(copy.height_),
-      frame_buffer_(copy.frame_buffer_) {}
-
-void fem::image::Image::SetPixel(std::size_t x, std::size_t y, uint32_t rgb) {
-  frame_buffer_[x][y] = rgb;
-}
-
-void fem::image::Image::Fill(uint32_t rgb) {
-  frame_buffer_ = std::vector<std::vector<uint32_t>>(
-      width_, std::vector<uint32_t>(height_, rgb));
-}
-
-bool fem::image::Image::WritePng(const std::string& file_path) {
+bool WritePngFull(std::string file_path, std::size_t width_,
+                  std::size_t height_,
+                  std::vector<std::vector<uint32_t>> frame_buffer_) {
+  std::cout << "STARTING: " << file_path << "\n";
   FILE* out = fopen(file_path.c_str(), "wb");
   if (!out) {
     return false;
@@ -76,5 +61,34 @@ bool fem::image::Image::WritePng(const std::string& file_path) {
   png_free_data(png, info, PNG_FREE_ALL, -1);
   png_destroy_write_struct(&png, (png_infopp)NULL);
   fclose(out);
+  std::cout << "FINISHED: " << file_path << "\n";
   return true;
+}
+
+fem::image::Image::Image() : width_(0), height_(0) {}
+fem::image::Image::Image(std::size_t width, std::size_t height)
+    : width_(width),
+      height_(height),
+      frame_buffer_(width_, std::vector<uint32_t>(height_, 0)) {}
+fem::image::Image::Image(const Image& copy)
+    : width_(copy.width_),
+      height_(copy.height_),
+      frame_buffer_(copy.frame_buffer_) {}
+
+void fem::image::Image::SetPixel(std::size_t x, std::size_t y, uint32_t rgb) {
+  frame_buffer_[x][y] = rgb;
+}
+
+void fem::image::Image::Fill(uint32_t rgb) {
+  frame_buffer_ = std::vector<std::vector<uint32_t>>(
+      width_, std::vector<uint32_t>(height_, rgb));
+}
+
+std::future<bool> fem::image::Image::WritePng(const std::string& file_path) {
+  return std::async(std::launch::async, WritePngFull, file_path, width_,
+                    height_, frame_buffer_);
+}
+
+bool fem::image::Image::WritePngWait(const std::string& file_path) {
+  return WritePngFull(file_path, width_, height_, frame_buffer_);
 }

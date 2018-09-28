@@ -4,9 +4,15 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <future>
 
 namespace fem {
 namespace image {
+  inline std::string GenFileName(std::string base_name, uint64_t i){
+    char buff[255];
+    snprintf(buff, 255, "%s/%07lu%s.png", base_name.c_str(), i, base_name.c_str());
+    return std::string(buff);
+  }
   class Image {
    public:
     Image();
@@ -23,7 +29,8 @@ namespace image {
     void SetPixel(std::size_t x, std::size_t y, uint32_t rgb);
     void Fill(uint32_t rgb);
 
-    bool WritePng(const std::string& file_path);
+    std::future<bool> WritePng(const std::string& file_path);
+    bool WritePngWait(const std::string& file_path);
 
    protected:
     std::size_t width_, height_;

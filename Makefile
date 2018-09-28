@@ -5,9 +5,9 @@ ifndef .VERBOSE
 endif
 ROOT=$(shell pwd)
 ROOT=/home/arden/Documents/FEM/code
-CSS=clang++
+CXX=clang++
 CXXFLAGS=-std=c++17 -fPIC -Wall -Wpedantic --static
-LINK=-lz
+LINK=-lz -lpthread
 SOURCE=src
 INCLUDE_DIR=include
 INCLUDE=-I$(ROOT)/build/libpng.a/include
