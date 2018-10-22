@@ -20,6 +20,7 @@ namespace mesh {
 
     void DeterminEdges();
     bool CircumCircle(const std::size_t& tri, const std::array<double, 2>& pt) const;
+    bool CircumCircle(const std::size_t& tri, const std::size_t& pt) const;
 
     std::vector<std::array<double, 2>> points;
     std::vector<std::array<std::size_t, 3>> triangles;

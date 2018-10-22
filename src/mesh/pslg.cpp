@@ -110,7 +110,8 @@ std::vector<std::array<double, 2>> fem::mesh::GenPoints(const Pslg& pslg,
   std::uniform_real_distribution<double> dist(0.0, ep);
   for (auto& y : util::StepRange(range_y[0] - ep, range_y[1] + ep, scale)) {
     for (auto& x : util::StepRange(range_x[0] - ep, range_x[1] + ep, scale)) {
-      points.push_back({{x + dist(gen), y + dist(gen)}});
+      // points.push_back({{x + dist(gen), y + dist(gen)}});
+      points.push_back({{x, y}});
     }
   }
   return points;

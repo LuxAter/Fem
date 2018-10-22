@@ -52,11 +52,8 @@ void fem::mesh::Mesh::DeterminEdges() {
     if (!c_in) edges.push_back(c);
   }
 }
-bool fem::mesh::Mesh::CircumCircle(const std::size_t& tri, const std::array<double, 2>& pt) const{
-  // std::cout << "(" << points[triangles[tri][0]][0] << "," << points[triangles[tri][0]][1] << " "
-  //   << points[triangles[tri][1]][0] << "," << points[triangles[tri][1]][1] << " "
-  //   << points[triangles[tri][2]][0] << "," << points[triangles[tri][2]][1] << ")::"
-  //   << pt[0] << ',' << pt[1] << "\n";
+bool fem::mesh::Mesh::CircumCircle(const std::size_t& tri,
+                                   const std::array<double, 2>& pt) const {
   double x13 = points[triangles[tri][0]][0] - points[triangles[tri][2]][0];
   double y13 = points[triangles[tri][0]][1] - points[triangles[tri][2]][1];
   double x23 = points[triangles[tri][1]][0] - points[triangles[tri][2]][0];
@@ -67,6 +64,11 @@ bool fem::mesh::Mesh::CircumCircle(const std::size_t& tri, const std::array<doub
   double y2p = points[triangles[tri][1]][1] - pt[1];
   return (x13 * x23 + y13 * y23) * (x2p * y1p - x1p * y2p) <
          (x23 * y13 - x13 * y23) * (x2p * x1p + y1p * y2p);
+}
+
+bool fem::mesh::Mesh::CircumCircle(const std::size_t& tri,
+                                   const std::size_t& pt) const {
+  return CircumCircle(tri, points[pt]);
 }
 
 fem::mesh::Mesh fem::mesh::LoadMesh(const std::string& file) {

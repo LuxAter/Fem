@@ -32,7 +32,10 @@ namespace mesh {
   bool EdgeCheck(const std::vector<std::array<std::size_t, 2>>& bad_edges,
                  const std::vector<std::array<std::size_t, 2>>& good_edges,
                  const std::array<std::size_t, 2>& edge);
-  void ApplyEdge(Mesh& mesh, const std::array<std::size_t, 2>& edge);
+  std::vector<std::array<std::size_t, 2>> ApplyEdge(
+      Mesh& mesh, const std::array<std::size_t, 2>& edge);
+  void RestoreDelaunay(Mesh& mesh, const std::array<std::size_t, 2>& constrained_edge,
+                       std::vector<std::array<std::size_t, 2>> edges);
   // Mesh Delaunay(std::vector<std::array<double, 2>>& points);
   Mesh Delaunay(const Pslg& plsg);
 }  // namespace mesh
