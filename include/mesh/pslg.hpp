@@ -9,23 +9,22 @@ namespace fem {
 namespace mesh {
   class Pslg {
    public:
-    void Center();
-    void Center(double x, double y);
-    void Scale();
-    void Scale(double alpha);
+    std::array<double, 4> Bounds() const;
 
-    bool Contains(std::array<double, 2> pt);
-    bool Contains(std::array<std::size_t, 2> eg);
+    void Scale();
 
     std::vector<std::array<double, 2>> points;
     std::vector<std::array<double, 2>> holes;
     std::vector<std::array<std::size_t, 2>> edges;
   };
 
-  std::vector<std::array<double, 2>> GenPoints(const Pslg& pslg,
-                                               std::size_t scale = 10);
+  Pslg operator*(const Pslg& lhs, const double& rhs);
+  Pslg operator+(const Pslg& lhs, const double& rhs);
+
+  Pslg Random(const std::size_t& points, const std::size_t& edges);
 
   Pslg LoadPslg(const std::string& file);
+  Pslg LoadSvgToPslg(const std::string& file);
   void SavePslg(const std::string& file, Pslg pslg);
 }  // namespace mesh
 }  // namespace fem

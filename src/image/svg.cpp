@@ -1,14 +1,14 @@
 #include "image/svg.hpp"
 
+#include <cmath>
 #include <cstdint>
 #include <future>
 #include <map>
 #include <string>
 #include <vector>
-#include <cmath>
 
-#include "mesh/pslg.hpp"
 #include "mesh/mesh.hpp"
+#include "mesh/pslg.hpp"
 
 #include <iostream>
 
@@ -125,13 +125,29 @@ void fem::image::Svg::Rectangle(uint32_t x, uint32_t y, uint32_t w, uint32_t h,
                        {"stroke-width", std::to_string(stroke)}});
 }
 
+void fem::image::Svg::PolyLine(std::vector<std::array<double, 2>> points,
+                               std::string color, uint32_t stroke,
+                               uint32_t dash) {
+  std::string points_string;
+  for (auto& it : points) {
+    points_string += std::to_string(static_cast<uint32_t>(it[0])) + ',' +
+                     std::to_string(static_cast<uint32_t>(it[1])) + ' ';
+  }
+  elements_.push_back({{"type", "polyline"},
+                       {"points", points_string},
+                       {"stroke", color},
+                       {"fill", "none"},
+                       {"stroke-width", std::to_string(stroke)},
+                       {"stroke-dasharray", std::to_string(dash)}});
+}
+
 void fem::image::Svg::Pslg(mesh::Pslg pslg, std::string edge, std::string point,
                            std::string hole, uint32_t stroke) {
   for (auto& eg : pslg.edges) {
     Line(pslg.points[eg[0]][0], pslg.points[eg[0]][1], pslg.points[eg[1]][0],
          pslg.points[eg[1]][1], edge, stroke);
   }
-  if (stroke == 1){
+  if (stroke == 1) {
     stroke = 2;
   }
   for (auto& pt : pslg.points) {
@@ -143,13 +159,13 @@ void fem::image::Svg::Pslg(mesh::Pslg pslg, std::string edge, std::string point,
 }
 
 void fem::image::Svg::Mesh(mesh::Mesh mesh, std::string edge,
-    std::string vertex, uint32_t stroke, uint32_t dash){
+                           std::string vertex, uint32_t stroke, uint32_t dash) {
   mesh.DeterminEdges();
-  for(auto& eg : mesh.edges){
+  for (auto& eg : mesh.edges) {
     Line(mesh.points[eg[0]][0], mesh.points[eg[0]][1], mesh.points[eg[1]][0],
          mesh.points[eg[1]][1], edge, stroke, dash);
   }
-  if (stroke == 1){
+  if (stroke == 1) {
     stroke = 2;
   }
   for (auto& pt : mesh.points) {

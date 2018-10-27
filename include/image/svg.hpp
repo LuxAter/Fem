@@ -7,8 +7,8 @@
 #include <string>
 #include <vector>
 
-#include "../mesh/pslg.hpp"
 #include "../mesh/mesh.hpp"
+#include "../mesh/pslg.hpp"
 
 namespace fem {
 namespace image {
@@ -23,7 +23,8 @@ namespace image {
     void Point(uint32_t x, uint32_t y, std::string color = "#000000");
 
     void Line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1,
-              std::string color = "#000000", uint32_t stroke = 1, uint32_t dash = 0);
+              std::string color = "#000000", uint32_t stroke = 1,
+              uint32_t dash = 0);
 
     void Circle(uint32_t x, uint32_t y, uint32_t r,
                 std::string color = "#000000", std::string fill = "none",
@@ -46,12 +47,16 @@ namespace image {
     void Rectangle(uint32_t x, uint32_t y, uint32_t w, uint32_t h,
                    std::string color = "#000000", std::string fill = "none",
                    uint32_t stroke = 1);
+    void PolyLine(std::vector<std::array<double, 2>> points,
+                  std::string color = "#000000", uint32_t stroke = 1,
+                  uint32_t dash = 0);
 
     void Pslg(mesh::Pslg pslg, std::string edge = "#000000",
               std::string point = "#000000", std::string hole = "#ff0000",
               uint32_t stroke = 1);
     void Mesh(mesh::Mesh mesh, std::string edge = "#000000",
-        std::string vertex = "#000000", uint32_t stroke = 1, uint32_t dash=0);
+              std::string vertex = "#000000", uint32_t stroke = 1,
+              uint32_t dash = 0);
 
     std::future<bool> WriteSvg(const std::string& file_path);
     bool WriteSvgWait(const std::string& file_path);

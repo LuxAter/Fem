@@ -6,32 +6,12 @@
 
 namespace fem {
 namespace math {
-  // template <typename _T, typename _Al = std::allocator<_T>>
-  // class Matrix {
-  //  public:
-  //
-  //    typedef _Al allocator_type;
-  //    typedef typename _Al::value_type value_type;
-  //    typedef typename _Al::reference reference;
-  //    typedef typename _Al::pointer pointer;
-  //    typedef typename _Al::pointer iterator;
-  //
-  //   Matrix(std::size_t w, std::size_t h)
-  //       : __data(h, std::vector<_T>(w, _T())) {}
-  //   Matrix(const std::size_t w, std::size_t h, _T val)
-  //       : __data(h, std::vector<_T>(w, val)) {}
-  //   Matrix(const std::initializer_list<std::initializer_list<_T>>& mat){
-  //     // iterator index = begin();
-  //     // for(typename
-  //     std::initializer_list<std::initializer_list<_T>>::const_iterator it =
-  //     mat.begin(); it != mat.end(); ++it){
-  //     //
-  //     // }
-  //   }
-  //
-  //  private:
-  //   std::vector<std::vector<_T>> __data;
-  // };
+  template <typename _T, std::size_t _N>
+    using Matrix = std::array<std::array<_T, _N>, _N>;
+  template <typename _T, std::size_t _N>
+    using Vector= std::array<std::array<_T, _N>, _N>;
+
+
   template <typename _T, std::size_t _N>
   std::array<_T, _N> TDM(std::array<std::array<_T, _N>, _N> mat,
                       std::array<_T, _N> vec) {
@@ -47,6 +27,44 @@ namespace math {
     }
     return x;
   }
+
+  template<typename _T, std::size_t _N>
+    Matrix<_T,_N> operator+(const Matrix<_T, _N>& lhs, const Matrix<_T,_N>&rhs){
+      Matrix<_T, _N> mat;
+      for(std::size_t row = 0; row < _N; ++row){
+        for(std::size_t col = 0; col < _N; ++col){
+          mat[row][col] = lhs[row][col] + rhs[row][col];
+        }
+      }
+    }
+  template<typename _T, std::size_t _N>
+    Matrix<_T,_N> operator+(const Matrix<_T, _N>& lhs, const _T& rhs){
+      Matrix<_T, _N> mat;
+      for(std::size_t row = 0; row < _N; ++row){
+        for(std::size_t col = 0; col < _N; ++col){
+          mat[row][col] = lhs[row][col] + rhs;
+        }
+      }
+    }
+  template<typename _T, std::size_t _N>
+    Matrix<_T,_N> operator+(const _T& lhs, const Matrix<_T, _N>& rhs){
+      Matrix<_T, _N> mat;
+      for(std::size_t row = 0; row < _N; ++row){
+        for(std::size_t col = 0; col < _N; ++col){
+          mat[row][col] = lhs[row][col] + rhs;
+        }
+      }
+    }
+  template<typename _T, std::size_t _N>
+    Matrix<_T,_N> operator-(const Matrix<_T, _N>& lhs, const Matrix<_T,_N>&rhs){
+      Matrix<_T, _N> mat;
+      for(std::size_t row = 0; row < _N; ++row){
+        for(std::size_t col = 0; col < _N; ++col){
+          mat[row][col] = lhs[row][col] - rhs[row][col];
+        }
+      }
+    }
+
 }  // namespace math
 }  // namespace fem
 
