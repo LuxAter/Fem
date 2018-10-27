@@ -6,6 +6,8 @@
 #include <type_traits>
 #include <vector>
 
+#include <iostream>
+
 namespace fem {
 namespace util {
   template <typename _T>
@@ -44,7 +46,7 @@ namespace util {
       _T size = std::fabs(a - b) / static_cast<_T>(_N);
       std::array<_T, _N> values;
       std::size_t index = 0;
-      for(_T i = a; i < b; i += size, ++index){
+      for(_T i = a; i < b && index < _N; i += size, ++index){
         values[index] = func(i);
       }
       return values;

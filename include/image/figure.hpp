@@ -39,6 +39,7 @@ namespace image {
       for (std::size_t i = 0; i < _N; ++i) {
         double dx = static_cast<double>(x[i]);
         double dy = static_cast<double>(y[i]);
+        // std::cout << x[i] << "->" << dx << "<<<\n";
         bounds_[0] = std::min(bounds_[0], dx);
         bounds_[1] = std::min(bounds_[1], dy);
         bounds_[2] = std::max(bounds_[2], dx);

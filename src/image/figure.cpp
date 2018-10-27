@@ -47,8 +47,10 @@ void fem::image::Figure::SaveSvg(const std::string& file) {
   }
   for (auto& it : line_) {
     for (auto& pt : std::get<0>(it)) {
+      // std::cout << pt[0] << ',' << pt[1] << "->";
       pt[0] = (pt[0] - bounds_[0]) * sx + offset_x;
       pt[1] = height_ - ((pt[1] - bounds_[1]) * sy) - offset_y;
+      // std::cout << pt[0] << ',' << pt[1] << "\n";
     }
     PlotLine(svg, it);
   }
@@ -67,7 +69,7 @@ void fem::image::Figure::SavePgf(const std::string& file) {
   for (auto& it : line_) {
     uint32_t r = 0, g = 0, b = 0;
     sscanf(std::get<1>(it).c_str(), "#%02x%02x%02x", &r, &g, &b);
-    std::cout << std::get<1>(it) << "->" << r << ',' << g << ',' << b << '\n';
+    // std::cout << std::get<1>(it) << "->" << r << ',' << g << ',' << b << '\n';
     snprintf(buff, 255, "\\definecolor{color%u}{RGB}{%u,%u,%u}\n", color_index, r, g, b);
     pre += std::string(buff);
     std::string opt = std::get<5>(it) != 0 ? "dashed, " : "";
