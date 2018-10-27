@@ -8,6 +8,9 @@
 
 namespace fem {
 namespace math {
+
+  // TODO(Arden): Implement Tridiagonal matrix optimizations
+
   template <typename _T, std::size_t _N>
   using Matrix = std::array<std::array<_T, _N>, _N>;
   template <typename _T, std::size_t _N>
@@ -22,6 +25,14 @@ namespace math {
         }
       }
       return mat;
+    }
+  template<typename _T, std::size_t _N>
+    Vector<_T, _N> VZeros(){
+      Vector<_T, _N> vec;
+      for(std::size_t i = 0; i < _N; ++i){
+        vec[0] = 0.0;
+      }
+      return vec;
     }
 
   template <typename _T, std::size_t _N>
