@@ -4,7 +4,6 @@ ifndef .VERBOSE
     .SILENT:
 endif
 ROOT=$(shell pwd)
-ROOT=/home/arden/Documents/FEM/code
 CXX=clang++
 CXXFLAGS=-std=c++17 -fPIC -Wall -Wpedantic --static
 LINK=-lz -lpthread
@@ -62,7 +61,7 @@ clean: clean-libfem.a clean-fem
 
 # FEM {{{
 
-FEM=/home/arden/Documents/FEM/code/fem.exe
+FEM=$(ROOT)/fem.exe
 FEM_FILES=src/main.cpp
 FEM_OBJS=$(FEM_FILES:%=$(ROOT)/$(BUILD)/%.o)
 -include $(FEM_OBJS:.o=.d)
