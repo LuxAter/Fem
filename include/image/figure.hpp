@@ -14,6 +14,11 @@
 
 namespace fem {
 namespace image {
+  inline std::string GenFileName(std::string base_name, std::string ext, uint64_t i){
+    char buff[255];
+    snprintf(buff, 255, "%s/%07lu%s.%s", base_name.c_str(), i, base_name.c_str(), ext.c_str());
+    return std::string(buff);
+  }
   class Figure {
    public:
     Figure();
