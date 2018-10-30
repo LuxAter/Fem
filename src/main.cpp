@@ -118,10 +118,10 @@ using namespace fem::math;
 // }
 
 int main(int argc, char* argv[]) {
-  double c = 2 * M_PI;
+  double c = 5;
   double T0 = 0;
   double Tc = 0;
-  uint32_t nu = 23;
+  uint32_t nu = 2;
   //
   // // sin(x)
   std::function<double(double)> f = [c, nu](double x) {
@@ -137,40 +137,50 @@ int main(int argc, char* argv[]) {
   // fig.Line(fem::util::StepRangeArray<double, 200>(0.0, c),
   //          fem::util::FuncStepRangeArray<double, 200>(soln, 0.0, c), "", "",
   //          "", 5);
-#define C 200
+#define C 500
   std::array<double, C> Errors;
   std::array<double, C> Times;
-  for (uint32_t N = 2; N < C + 2; ++N) {
-    fem::image::Figure fig(1000, 1000);
-    auto begin = std::chrono::high_resolution_clock::now();
-    auto Th = fem::d1::FEA(f, c, T0, Tc, N);
-    auto end = std::chrono::high_resolution_clock::now();
-    double error = fem::d1::CalcError(Th, soln, 0.0, c);
-    double dt = std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count() * 1.0e-9;
-    Times[N-2] = dt;
-    Errors[N - 2] = error;
-    std::cout << N << ":" << error << ":" << dt << "\n";
-    fig.Line(fem::util::StepRangeArray<double, 200>(0.0, c),
-             fem::util::FuncStepRangeArray<double, 200>(soln, 0.0, c), "black",
-             "black", "black", 5, 10);
-    fig.Line(fem::util::StepRangeArray<double, 200>(0.0, c),
-             fem::util::FuncStepRangeArray<double, 200>(Th, 0.0, c), "black",
-             "black", "black", 5);
-    fig.SaveSvg(fem::image::GenFileName("animation", "svg", N - 2));
-  }
-  err.Line(fem::util::StepRangeArray<double, C>(2, C + 2), Errors, "", "", "", 5);
-  err.Line(fem::util::StepRangeArray<double, C>(2, C + 2), Times, "", "", "", 5);
-  err.Line(fem::util::StepRangeArray<double, C>(2, C + 2), fem::util::FuncStepRangeArray<double, C>([](double x){return 1;}, 2, C + 2), "black", "black", "black", 5, 10);
-  err.Line(fem::util::StepRangeArray<double, C>(2, C + 2), fem::util::FuncStepRangeArray<double, C>([](double x){return 0.1;}, 2, C + 2), "black", "black", "black", 5, 10);
-  err.Line(fem::util::StepRangeArray<double, C>(2, C + 2), fem::util::FuncStepRangeArray<double, C>([](double x){return 0.01;}, 2, C + 2), "black", "black", "black", 5, 10);
-
-  err.SaveSvg("error.svg");
-
-  tim.Line(fem::util::StepRangeArray<double, C>(2, C + 2), Times, "", "", "", 5);
-  // tim.Line(fem::util::StepRangeArray<double, C>(2, C + 2), fem::util::FuncStepRangeArray<double, C>([](double x){return 1;}, 2, C + 2), "black", "black", "black", 5, 10);
-  tim.Line(fem::util::StepRangeArray<double, C>(2, C + 2), fem::util::FuncStepRangeArray<double, C>([](double x){return 0.1;}, 2, C + 2), "black", "black", "black", 5, 10);
-  tim.Line(fem::util::StepRangeArray<double, C>(2, C + 2), fem::util::FuncStepRangeArray<double, C>([](double x){return 0.01;}, 2, C + 2), "black", "black", "black", 5, 10);
-  tim.SaveSvg("time.svg");
+  auto Th = fem::d1::FEA(f, c, T0, Tc, 500);
+  fem::image::Figure fig(1000, 1000);
+  fig.Line(fem::util::StepRangeArray<double, 200>(0.0, c), fem::util::FuncStepRangeArray<double, 200>(soln, 0.0, c), "black", "black", "black", 1, 5);
+  fig.Line(fem::util::StepRangeArray<double, 200>(0.0, c), fem::util::FuncStepRangeArray<double, 200>(Th, 0.0, c), "black", "black", "black");
+  double error = fem::d1::CalcError(Th, soln, 0.0, c);
+  std::cout << error << "\n";
+  fig.SavePgf("example.tikz");
+  fig.SaveSvg("example.svg");
+  // for (uint32_t N = 2; N < C + 2; ++N) {
+  //   // fem::image::Figure fig(1000, 1000);
+  //   auto begin = std::chrono::high_resolution_clock::now();
+  //   auto Th = fem::d1::FEA(f, c, T0, Tc, N);
+  //   auto end = std::chrono::high_resolution_clock::now();
+  //   double error = fem::d1::CalcError(Th, soln, 0.0, c);
+  //   double dt = std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count() * 1.0e-9;
+  //   Times[N-2] = dt;
+  //   Errors[N - 2] = error;
+  //   std::cout << N << ":" << error << ":" << dt << "\n";
+  //   // fig.Line(fem::util::StepRangeArray<double, 200>(0.0, c),
+  //   //          fem::util::FuncStepRangeArray<double, 200>(soln, 0.0, c), "black",
+  //   //          "black", "black", 5, 10);
+  //   // fig.Line(fem::util::StepRangeArray<double, 200>(0.0, c),
+  //   //          fem::util::FuncStepRangeArray<double, 200>(Th, 0.0, c), "black",
+  //   //          "black", "black", 5);
+  //   // fig.SaveSvg(fem::image::GenFileName("animation", "svg", N - 2));
+  // }
+  // err.Line(fem::util::StepRangeArray<double, C>(2, C + 2), Errors, "black", "black", "black", 5);
+  // // err.Line(fem::util::StepRangeArray<double, C>(2, C + 2), Times, "", "", "", 5);
+  // err.Line(fem::util::StepRangeArray<double, C>(2, C + 2), fem::util::FuncStepRangeArray<double, C>([](double x){return 1;}, 2, C + 2), "black", "black", "black", 5, 10);
+  // err.Line(fem::util::StepRangeArray<double, C>(2, C + 2), fem::util::FuncStepRangeArray<double, C>([](double x){return 0.1;}, 2, C + 2), "black", "black", "black", 5, 10);
+  // err.Line(fem::util::StepRangeArray<double, C>(2, C + 2), fem::util::FuncStepRangeArray<double, C>([](double x){return 0.01;}, 2, C + 2), "black", "black", "black", 5, 10);
+  //
+  // err.SavePgf("error.tikz");
+  // err.SaveSvg("error.svg");
+  //
+  // tim.Line(fem::util::StepRangeArray<double, C>(2, C + 2), Times, "", "", "", 5);
+  // // tim.Line(fem::util::StepRangeArray<double, C>(2, C + 2), fem::util::FuncStepRangeArray<double, C>([](double x){return 1;}, 2, C + 2), "black", "black", "black", 5, 10);
+  // // tim.Line(fem::util::StepRangeArray<double, C>(2, C + 2), fem::util::FuncStepRangeArray<double, C>([](double x){return 0.1;}, 2, C + 2), "black", "black", "black", 5, 10);
+  // // tim.Line(fem::util::StepRangeArray<double, C>(2, C + 2), fem::util::FuncStepRangeArray<double, C>([](double x){return 0.01;}, 2, C + 2), "black", "black", "black", 5, 10);
+  // tim.SavePgf("time.tikz");
+  // tim.SaveSvg("time.svg");
   // fig.SaveSvg("test.svg");
 
   return 0;

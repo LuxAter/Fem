@@ -4,7 +4,11 @@ ifndef .VERBOSE
     .SILENT:
 endif
 ROOT=$(shell pwd)
-CXX=clang++
+ifndef HOSTNAME
+  CXX=clang++
+else
+  CXX=g++
+endif
 CXXFLAGS=-std=c++17 -fPIC -Wall -Wpedantic --static
 LINK=-lz -lpthread
 SOURCE=src

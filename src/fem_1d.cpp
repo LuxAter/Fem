@@ -117,8 +117,11 @@ fem::d1::Func fem::d1::FEA(const fem::d1::Func& f, const double& c,
     F[e] += E.second[0];
     F[e + 1] += E.second[1];
   }
+  // std::cout << A << F << "<<\n";
   std::pair<fem::math::Matrix<double>, fem::math::Vector<double>> EQ =
       ApplyDirchlet(A, F, T0, Tc, N);
   fem::math::Vector<double> T = fem::math::TDM(EQ.first, EQ.second);
+
+  // std::cout << T << "\n";
   return GenApprox(T, h, N);
 }
