@@ -4,11 +4,12 @@ ifndef .VERBOSE
     .SILENT:
 endif
 ROOT=$(shell pwd)
-ifndef HOSTNAME
-  CXX=clang++
-else
-  CXX=g++
+ifeq ($(shell hostname),"mayo.blt.lclark.local")
+  MULTI_THREAD=true
+else ifeq ($(MULTI_THREAD),)
+  MULTI_THREAD=false
 endif
+CXX=clang++
 CXXFLAGS=-std=c++17 -fPIC -Wall -Wpedantic --static
 LINK=-lz -lpthread
 SOURCE=src
@@ -60,6 +61,8 @@ printf "%b%*s%b: %s\n" "$(HELP_COLOR)" 20 "$(1)" "\033[0m" "$(2)"
 endef
 
 all: build-fem
+	echo "$(CXX)"
+	echo "$(MULTI_THREAD)"
 
 clean: clean-libfem.a clean-fem
 
