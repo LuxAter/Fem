@@ -1,6 +1,8 @@
 #include "fem_1d.hpp"
 
 #include <functional>
+#include <thread>
+#include <future>
 
 #include "math/differentiate.hpp"
 #include "math/function.hpp"
@@ -107,6 +109,26 @@ fem::d1::Func fem::d1::FEA(const fem::d1::Func& f, const double& c,
   double h = c / (N - 1);
   fem::math::Matrix<double> A(N);
   fem::math::Vector<double> F(N);
+
+#ifdef _REENTRANT
+  std::cout << "MULTI!\n";
+  std::vector<std::future<std::pair<fem::math::Matrix<double>, fem::math::Vector<double>>>> threads;
+  for (uint32_t e = 0; e < N - 1; ++e) {
+    threads.push_back(std::async(std::launch::async, GenElement, std::ref(f),
+                                 e + 1, h));
+  }
+  for (uint32_t e = 0; e < N - 1; ++e) {
+    std::pair<fem::math::Matrix<double>, fem::math::Vector<double>> E =
+        threads[e].get();
+    A[e][e] += E.first[0][0];
+    A[e][e + 1] += E.first[0][1];
+    A[e + 1][e] += E.first[1][0];
+    A[e + 1][e + 1] += E.first[1][1];
+    F[e] += E.second[0];
+    F[e + 1] += E.second[1];
+  }
+#else
+  std::cout << "Single!\n";
   for (uint32_t e = 0; e < N - 1; ++e) {
     std::pair<fem::math::Matrix<double>, fem::math::Vector<double>> E =
         GenElement(f, e + 1, h);
@@ -117,6 +139,8 @@ fem::d1::Func fem::d1::FEA(const fem::d1::Func& f, const double& c,
     F[e] += E.second[0];
     F[e + 1] += E.second[1];
   }
+#endif
+
   // std::cout << A << F << "<<\n";
   std::pair<fem::math::Matrix<double>, fem::math::Vector<double>> EQ =
       ApplyDirchlet(A, F, T0, Tc, N);

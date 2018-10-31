@@ -58,7 +58,11 @@ namespace image {
               std::string vertex = "#000000", uint32_t stroke = 1,
               uint32_t dash = 0);
 
+#ifdef _REENTRANT
     std::future<bool> WriteSvg(const std::string& file_path);
+#else
+    bool WriteSvg(const std::string& file_path);
+#endif
     bool WriteSvgWait(const std::string& file_path);
 
     inline std::map<std::string, std::string>& operator[](int64_t i) {

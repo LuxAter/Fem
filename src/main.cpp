@@ -137,17 +137,19 @@ int main(int argc, char* argv[]) {
   // fig.Line(fem::util::StepRangeArray<double, 200>(0.0, c),
   //          fem::util::FuncStepRangeArray<double, 200>(soln, 0.0, c), "", "",
   //          "", 5);
-#define C 500
+#define C 10000
   std::array<double, C> Errors;
   std::array<double, C> Times;
-  auto Th = fem::d1::FEA(f, c, T0, Tc, 500);
-  fem::image::Figure fig(1000, 1000);
-  fig.Line(fem::util::StepRangeArray<double, 200>(0.0, c), fem::util::FuncStepRangeArray<double, 200>(soln, 0.0, c), "black", "black", "black", 1, 5);
-  fig.Line(fem::util::StepRangeArray<double, 200>(0.0, c), fem::util::FuncStepRangeArray<double, 200>(Th, 0.0, c), "black", "black", "black");
+  auto begin = std::chrono::high_resolution_clock::now();
+  auto Th = fem::d1::FEA(f, c, T0, Tc, C);
+  auto end = std::chrono::high_resolution_clock::now();
+  double dt = std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count() * 1.0e-9;
   double error = fem::d1::CalcError(Th, soln, 0.0, c);
+  std::cout << C << "\n";
   std::cout << error << "\n";
-  fig.SavePgf("example.tikz");
-  fig.SaveSvg("example.svg");
+  std::cout << dt << "\n";
+  // fig.SavePgf("example.tikz");
+  // fig.SaveSvg("example.svg");
   // for (uint32_t N = 2; N < C + 2; ++N) {
   //   // fem::image::Figure fig(1000, 1000);
   //   auto begin = std::chrono::high_resolution_clock::now();

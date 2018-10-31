@@ -4,19 +4,25 @@ ifndef .VERBOSE
     .SILENT:
 endif
 ROOT=$(shell pwd)
-ifeq ($(shell hostname),"mayo.blt.lclark.local")
-  MULTI_THREAD=true
-else ifeq ($(MULTI_THREAD),)
-  MULTI_THREAD=false
-endif
 CXX=clang++
 CXXFLAGS=-std=c++17 -fPIC -Wall -Wpedantic --static
-LINK=-lz -lpthread
+LINK=-lz
 SOURCE=src
 INCLUDE_DIR=include
-INCLUDE=-I$(ROOT)/build/libpng.a/include
+# INCLUDE=-I$(ROOT)/build/libpng.a/include
 BUILD=build
 COMMON_INCLUDE=-I$(ROOT)/$(INCLUDE_DIR) $(INCLUDE)
+
+ifeq ($(shell hostname),"mayo.blt.lclark.local")
+  CXXFLAGS += -pthread
+  LINK += -lpthread
+else ifneq ($(multi),)
+  CXXFLAGS += -pthread
+  LINK += -lpthread
+else ifneq ($(MULTI),)
+  CXXFLAGS += -pthread
+  LINK += -lpthread
+endif
 
 SCAN_COLOR=\033[1;35m
 BUILD_COLOR=\033[32m
@@ -61,8 +67,7 @@ printf "%b%*s%b: %s\n" "$(HELP_COLOR)" 20 "$(1)" "\033[0m" "$(2)"
 endef
 
 all: build-fem
-	echo "$(CXX)"
-	echo "$(MULTI_THREAD)"
+	echo "$(CXXFLAGS)"
 
 clean: clean-libfem.a clean-fem
 
@@ -104,7 +109,7 @@ LIBFEM.A_FILES=$(filter-out src/main.cpp, $(shell find "src/" -name "*.cpp"))
 LIBFEM.A_OBJS=$(LIBFEM.A_FILES:%=$(ROOT)/$(BUILD)/%.o)
 -include $(LIBFEM.A_OBJS:.o=.d)
 
-build-libfem.a: build-libpng.a pre-libfem.a $(LIBFEM.A)
+build-libfem.a: pre-libfem.a $(LIBFEM.A)
 	$(call complete_target,$(shell basename $(LIBFEM.A)))
 
 clean-libfem.a: clean-libpng.a
@@ -117,7 +122,6 @@ pre-libfem.a:
 $(LIBFEM.A): $(LIBFEM.A_OBJS)
 	$(call print_link_lib,$(shell basename $(LIBFEM.A)))
 	ar rcs $@ $(LIBFEM.A_OBJS)
-	mkdir -p $(ROOT)/tmp/libpng.a && cd $(ROOT)/tmp/libpng.a && ar x $(ROOT)/build/libpng.a/lib/libpng.a && ar qc $(ROOT)/$@ $(ROOT)/tmp/libpng.a/*.o && rm -rf $(ROOT)/tmp/libpng.a
 
 install-libfem.a: build-libfem.a
 	$(call install_target,$(shell basename $(LIBFEM.A)))

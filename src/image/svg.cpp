@@ -173,10 +173,16 @@ void fem::image::Svg::Mesh(mesh::Mesh mesh, std::string edge,
   }
 }
 
+#ifdef _REENTRANT
 std::future<bool> fem::image::Svg::WriteSvg(const std::string& file_path) {
   return std::async(std::launch::async, WriteSvgFull, file_path, width_,
                     height_, elements_);
 }
+#else
+bool fem::image::Svg::WriteSvg(const std::string& file_path) {
+  return WriteSvgFull(file_path, width_, height_, elements_);
+}
+#endif
 bool fem::image::Svg::WriteSvgWait(const std::string& file_path) {
   return WriteSvgFull(file_path, width_, height_, elements_);
 }
