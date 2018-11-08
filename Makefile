@@ -16,10 +16,10 @@ COMMON_INCLUDE=-I$(ROOT)/$(INCLUDE_DIR) $(INCLUDE)
 ifeq ($(shell hostname),"mayo.blt.lclark.local")
   CXXFLAGS += -pthread
   LINK += -lpthread
-else ifneq ($(multi),)
+else ifneq ($(multi),0)
   CXXFLAGS += -pthread
   LINK += -lpthread
-else ifneq ($(MULTI),)
+else ifneq ($(MULTI),0)
   CXXFLAGS += -pthread
   LINK += -lpthread
 endif

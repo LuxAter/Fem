@@ -111,7 +111,6 @@ fem::d1::Func fem::d1::FEA(const fem::d1::Func& f, const double& c,
   fem::math::Vector<double> F(N);
 
 #ifdef _REENTRANT
-  std::cout << "MULTI!\n";
   std::vector<std::future<std::pair<fem::math::Matrix<double>, fem::math::Vector<double>>>> threads;
   for (uint32_t e = 0; e < N - 1; ++e) {
     threads.push_back(std::async(std::launch::async, GenElement, std::ref(f),
@@ -128,7 +127,6 @@ fem::d1::Func fem::d1::FEA(const fem::d1::Func& f, const double& c,
     F[e + 1] += E.second[1];
   }
 #else
-  std::cout << "Single!\n";
   for (uint32_t e = 0; e < N - 1; ++e) {
     std::pair<fem::math::Matrix<double>, fem::math::Vector<double>> E =
         GenElement(f, e + 1, h);
