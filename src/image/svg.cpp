@@ -173,6 +173,41 @@ void fem::image::Svg::Mesh(mesh::Mesh mesh, std::string edge,
   }
 }
 
+void fem::image::Svg::Triangles(std::vector<std::array<uint64_t, 3>>& triangles,
+                                std::vector<std::array<double, 2>>& points,
+                                std::string edge, std::string vertex,
+                                uint32_t stroke, uint32_t dash, double scale,
+                                double shift) {
+  std::vector<std::array<uint64_t, 2>> edges;
+  for (auto& tri : triangles) {
+    for (uint64_t i = 0; i < 3; ++i) {
+      uint64_t j = (i + 1) % 3;
+      bool present = false;
+      for (uint64_t k = 0; k < edges.size() && present == false; ++k) {
+        if ((edges[k][0] == tri[i] && edges[k][1] == tri[j]) ||
+            (edges[k][1] == tri[i] && edges[k][0] == tri[j])) {
+          present = true;
+        }
+      }
+      if (present == false) {
+        edges.push_back({{tri[i], tri[j]}});
+      }
+    }
+  }
+  for (auto& eg : edges) {
+    Line((scale * points[eg[0]][0]) + shift, (scale * points[eg[0]][1]) + shift,
+         (scale * points[eg[1]][0]) + shift, (scale * points[eg[1]][1]) + shift,
+         edge, stroke, dash);
+  }
+  if (stroke == 1) {
+    stroke = 2;
+  }
+  for (auto& pt : points) {
+    Circle((scale * pt[0]) + shift, (scale * pt[1]) + shift, stroke / 2, vertex,
+           vertex);
+  }
+}
+
 #ifdef _REENTRANT
 std::future<bool> fem::image::Svg::WriteSvg(const std::string& file_path) {
   return std::async(std::launch::async, WriteSvgFull, file_path, width_,
