@@ -8,11 +8,10 @@
 
 #include "mesh/mesh.hpp"
 
-#include "image/svg.hpp"
 #include "image/figure.hpp"
+#include "image/svg.hpp"
 
 fem::mesh::Mesh fem::del::DelTri(std::vector<std::array<double, 2>> points) {
-  printf("TRACE %s\n", "1");
   std::array<double, 4> bounds = {{INFINITY, INFINITY, -INFINITY, -INFINITY}};
   for (auto& pt : points) {
     bounds[0] = std::min(bounds[0], pt[0]);
@@ -20,58 +19,46 @@ fem::mesh::Mesh fem::del::DelTri(std::vector<std::array<double, 2>> points) {
     bounds[2] = std::max(bounds[2], pt[0]);
     bounds[3] = std::max(bounds[3], pt[1]);
   }
-  printf("TRACE %s\n", "2");
   double dmax = std::max(bounds[2] - bounds[0], bounds[3] - bounds[1]);
   for (auto& pt : points) {
     pt[0] = (pt[0] - bounds[0]) / dmax;
     pt[1] = (pt[1] - bounds[1]) / dmax;
   }
-  printf("TRACE %s\n", "3");
   points = BSort(points);
-  printf("TRACE %s\n", "4");
   std::pair<std::vector<std::array<uint64_t, 3>>,
             std::vector<std::array<uint64_t, 3>>>
       delaunay = Delaun(points);
-  printf("TRACE %s\n", "5");
-  for (auto& tri : delaunay.first) {
-    printf("%lu:(%f,%f)--%lu:(%f,%f)--%lu(%f,%f)\n", tri[0], points[tri[0]][0],
-           points[tri[0]][1], tri[1], points[tri[1]][0], points[tri[1]][1],
-           tri[2], points[tri[2]][0], points[tri[2]][1]);
-  }
+  // for (auto& tri : delaunay.first) {
+  //   printf("%lu:(%f,%f)--%lu:(%f,%f)--%lu(%f,%f)\n", tri[0], points[tri[0]][0],
+  //          points[tri[0]][1], tri[1], points[tri[1]][0], points[tri[1]][1],
+  //          tri[2], points[tri[2]][0], points[tri[2]][1]);
+  // }
   for (auto& pt : points) {
     pt[0] = pt[0] * dmax + bounds[0];
     pt[1] = pt[1] * dmax + bounds[1];
   }
-  printf("TRACE %s\n", "6");
   fem::mesh::Mesh delaunay_mesh(points, delaunay.first);
-  printf("TRACE %s\n", "7");
   return delaunay_mesh;
 }
 
 std::vector<std::array<double, 2>> fem::del::BSort(
     const std::vector<std::array<double, 2>>& points) {
-  printf("TRACE %s\n", "3.1");
   uint32_t Ndiv = static_cast<uint32_t>(std::pow(points.size(), 0.25));
   std::vector<std::vector<uint32_t>> bins(Ndiv * Ndiv);
-  printf("TRACE %s\n", "3.2");
   double x_max = 0, y_max = 0;
   for (auto& it : points) {
     x_max = std::max(it[0], x_max);
     y_max = std::max(it[1], y_max);
   }
-  printf("TRACE %s\n", "3.3");
   for (uint32_t i = 0; i < points.size(); ++i) {
     uint32_t I = static_cast<uint32_t>(points[i][0] * Ndiv * 0.99 / x_max);
     uint32_t J = static_cast<uint32_t>(points[i][1] * Ndiv * 0.99 / y_max);
     if (I % 2 == 0) {
-      printf("INDEX: %u/%lu\n", I * Ndiv + J, bins.size());
       bins[I * Ndiv + J].push_back(i);
     } else {
-      printf("INDEX: %u/%lu\n", (I + 1) * Ndiv - J - 1, bins.size());
       bins[(I + 1) * Ndiv - J - 1].push_back(i);
     }
   }
-  printf("TRACE %s\n", "3.4");
   return QSorti(bins, points);
 }
 
@@ -79,20 +66,17 @@ std::vector<std::array<double, 2>> fem::del::QSorti(
     const std::vector<std::vector<uint32_t>>& bins,
     const std::vector<std::array<double, 2>>& points) {
   std::vector<std::array<double, 2>> new_points;
-  printf("TRACE %s\n", "3.4.1");
   for (auto& bin : bins) {
     for (auto& ind : bin) {
       new_points.push_back(points[ind]);
     }
   }
-  printf("TRACE %s\n", "3.4.2");
   return new_points;
 }
 
 std::pair<std::vector<std::array<uint64_t, 3>>,
           std::vector<std::array<uint64_t, 3>>>
 fem::del::Delaun(std::vector<std::array<double, 2>> points) {
-  printf("TRACE %s\n", "4.1");
   uint64_t num_points = points.size();
   // TODO change back to large numbers
   points.push_back({{-3, -3}});
@@ -103,21 +87,18 @@ fem::del::Delaun(std::vector<std::array<double, 2>> points) {
   adj.push_back({{0, 0, 0}});
   vrt.push_back({{points.size() - 3, points.size() - 2, points.size() - 1}});
   adj.push_back({{0, 0, 0}});
-  printf("TRACE %s\n", "4.2");
   fem::image::Svg img(500, 500);
   for (uint64_t i = 0; i < points.size() - 3; ++i) {
-    img.Fill("white");
-    img.Triangles(vrt, points, "black", "black", 1, 0, 80, 250);
-    img.WriteSvgWait(fem::image::GenFileName("delaunay", "svg", i));
-    printf(">>%lu<<\n", i);
-    for (auto& tri : vrt) {
-      printf("%lu:(%f,%f)--%lu:(%f,%f)--%lu(%f,%f)\n", tri[0],
-             points[tri[0]][0], points[tri[0]][1], tri[1], points[tri[1]][0],
-             points[tri[1]][1], tri[2], points[tri[2]][0], points[tri[2]][1]);
-    }
-    printf("TRACE %s\n", "4.2.1");
+    // img.Fill("white");
+    // img.Triangles(vrt, points, "black", "black", 1, 0, 80, 250);
+    // img.WriteSvgWait(fem::image::GenFileName("delaunay", "svg", i));
+    // for (auto& tri : vrt) {
+    //   printf("%lu:(%f,%f)--%lu:(%f,%f)--%lu(%f,%f)\n", tri[0],
+    //          points[tri[0]][0], points[tri[0]][1], tri[1], points[tri[1]][0],
+    //          points[tri[1]][1], tri[2], points[tri[2]][0],
+    //          points[tri[2]][1]);
+    // }
     uint64_t tri = TriLoc(points[i], points, vrt, adj);
-    printf("TRACE %s\n", "4.2.2");
 
     uint64_t a = adj[tri][0];
     uint64_t b = adj[tri][1];
@@ -147,16 +128,15 @@ fem::del::Delaun(std::vector<std::array<double, 2>> points) {
       adj[c][Edg(c, tri, adj)] = vrt.size() - 1;
       tri_stack.push(vrt.size() - 1);
     }
-    printf("TRACE %s\n", "4.2.3");
 
     while (tri_stack.empty() == false) {
       uint64_t l = tri_stack.top();
       tri_stack.pop();
-      uint64_t r = adj[l][2];
+      uint64_t r = adj[l][1];
 
       uint64_t erl = Edg(r, l, adj);
-      uint64_t era = (erl % 3) + 1;
-      uint64_t erb = (era % 3) + 1;
+      uint64_t era = (erl+1) % 3;
+      uint64_t erb = (era+1) % 3;
       v1 = vrt[r][erl];
       v2 = vrt[r][era];
       v3 = vrt[r][erb];
@@ -189,9 +169,7 @@ fem::del::Delaun(std::vector<std::array<double, 2>> points) {
         }
       }
     }
-    printf("TRACE %s\n", "4.2.4");
   }
-  printf("TRACE %s\n", "4.3");
   uint64_t tri;
   for (tri = 0; tri < vrt.size(); ++tri) {
     if (vrt[tri][0] >= num_points || vrt[tri][1] >= num_points ||
@@ -205,8 +183,6 @@ fem::del::Delaun(std::vector<std::array<double, 2>> points) {
       break;
     }
   }
-  printf("TRACE %s\n", "4.4");
-  printf(">>%lu\n", tri);
 
   uint64_t tri_start = tri + 1;
   uint64_t tri_stop = vrt.size();
@@ -233,7 +209,8 @@ fem::del::Delaun(std::vector<std::array<double, 2>> points) {
       }
     }
   }
-  printf("TRACE %s\n", "4.5");
+  vrt.resize(num_tri+1);
+  vrt.resize(num_tri+1);
   return std::make_pair(vrt, adj);
 }
 
@@ -282,7 +259,7 @@ bool fem::del::Swap(const std::array<double, 2>& p1,
   std::array<double, 2> e2p = p2 - p;
   double cos_a = e13[0] * e23[0] + e13[1] * e23[1];
   double cos_b = e2p[0] * e1p[0] + e1p[1] * e2p[1];
-  if (cos_a > 0.0 && cos_b > 0.0) {
+  if (cos_a >= 0.0 && cos_b >= 0.0) {
     return false;
   } else if (cos_a < 0.0 && cos_b < 0.0) {
     return true;
