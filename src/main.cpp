@@ -4,40 +4,50 @@
 #include <chrono>
 #include <functional>
 
+#include "data/json.hpp"
 #include "image/figure.hpp"
 #include "math/matrix.hpp"
+#include "math/sparse.hpp"
 #include "mesh/delaunay.hpp"
 #include "util/range.hpp"
-#include "data/json.hpp"
 
 using namespace fem::math;
 using namespace fem::data;
 
+#define C 5000
+
 int main(int argc, char* argv[]) {
-  JsonNode json(JsonNode::OBJECT);
-  json.insert("hello", "arden");
-  json.insert("value", {{3.1415, 1998, "testing"}});
-  std::cout << json << '\n';
-  json["value"].append("Hello World");
-  std::cout << json["value"] << "<<\n";
-  json.insert("Arden", JsonNode::OBJECT);
-  json["Arden"].insert("age", 20);
-  json["Arden"].insert("height", 6.2);
-  std::cout << json << '\n';
-  // uint64_t size = 1000;
+  fem::math::Sparse a(10), b(10);
+  a(5, 5) = 55;
+  a(2, 8) = 28;
+  b(9, 1) = 91;
+  b(0, 4) = 4;
+  std::cout << a;
+  std::cout << a.size() << ';' << a.count() << ';' << a.count2() << '\n';
+  fem::math::Sparse c = a - a;
+  std::cout << c;
+  std::cout << c.size() << ';' << c.count() << ';' << c.count2() << '\n';
+
+  // uint64_t size = 5000;
   // fem::image::Svg svg(size, size);
+  // fem::image::Figure tim(size, size);
   // std::vector<std::array<double, 2>> points;
+  // std::array<double, C> times;
   // srand(time(NULL));
-  // std::cout << "Generating Points\n";
-  // for (uint64_t n = 0; n < 10000; ++n) {
-  //   points.push_back({{static_cast<double>(rand() % (size - 20)) + 10,
-  //                      static_cast<double>(rand() % (size - 20)) + 10}});
+  // for (uint64_t npoints = 3; npoints < C + 3; npoints += 1) {
+  //   points.clear();
+  //   for (uint64_t n = 0; n < npoints; ++n) {
+  //     points.push_back({{static_cast<double>(rand() % (size - 20)) + 10,
+  //                        static_cast<double>(rand() % (size - 20)) + 10}});
+  //   }
+  //   auto begin = std::chrono::high_resolution_clock::now();
+  //   fem::mesh::Mesh delaunay = fem::del::DelTri(points);
+  //   auto end = std::chrono::high_resolution_clock::now();
+  //   double dt =
+  //   std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count()
+  //   * 1.0e-9; std::cout << npoints << "->" << dt << '\n'; times[npoints - 3]
+  //   = dt;
   // }
-  // std::cout << "Generating Mesh\n";
-  // fem::mesh::Mesh delaunay = fem::del::DelTri(points);
-  // std::cout << "Writing SVG\n";
-  // svg.Fill("white");
-  // svg.Mesh(delaunay);
-  // svg.WriteSvg("testing.svg");
-  return 0;
+  // tim.Line(fem::util::StepRangeArray<double, C>(3, C + 3), times, "", "", "",
+  // 5); tim.SavePgf("time.tikz"); tim.SaveSvg("time.svg"); return 0;
 }

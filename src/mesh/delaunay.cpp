@@ -28,11 +28,6 @@ fem::mesh::Mesh fem::del::DelTri(std::vector<std::array<double, 2>> points) {
   std::pair<std::vector<std::array<uint64_t, 3>>,
             std::vector<std::array<uint64_t, 3>>>
       delaunay = Delaun(points);
-  // for (auto& tri : delaunay.first) {
-  //   printf("%lu:(%f,%f)--%lu:(%f,%f)--%lu(%f,%f)\n", tri[0], points[tri[0]][0],
-  //          points[tri[0]][1], tri[1], points[tri[1]][0], points[tri[1]][1],
-  //          tri[2], points[tri[2]][0], points[tri[2]][1]);
-  // }
   for (auto& pt : points) {
     pt[0] = pt[0] * dmax + bounds[0];
     pt[1] = pt[1] * dmax + bounds[1];
@@ -89,15 +84,6 @@ fem::del::Delaun(std::vector<std::array<double, 2>> points) {
   adj.push_back({{0, 0, 0}});
   fem::image::Svg img(500, 500);
   for (uint64_t i = 0; i < points.size() - 3; ++i) {
-    // img.Fill("white");
-    // img.Triangles(vrt, points, "black", "black", 1, 0, 80, 250);
-    // img.WriteSvgWait(fem::image::GenFileName("delaunay", "svg", i));
-    // for (auto& tri : vrt) {
-    //   printf("%lu:(%f,%f)--%lu:(%f,%f)--%lu(%f,%f)\n", tri[0],
-    //          points[tri[0]][0], points[tri[0]][1], tri[1], points[tri[1]][0],
-    //          points[tri[1]][1], tri[2], points[tri[2]][0],
-    //          points[tri[2]][1]);
-    // }
     uint64_t tri = TriLoc(points[i], points, vrt, adj);
 
     uint64_t a = adj[tri][0];

@@ -67,7 +67,6 @@ printf "%b%*s%b: %s\n" "$(HELP_COLOR)" 20 "$(1)" "\033[0m" "$(2)"
 endef
 
 all: build-fem
-	echo "$(CXXFLAGS)"
 
 clean: clean-libfem.a clean-fem
 
