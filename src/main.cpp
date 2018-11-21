@@ -14,40 +14,45 @@
 using namespace fem::math;
 using namespace fem::data;
 
-#define C 5000
+#define POINTS 10
+#define EDGES 100
+#define S 10
 
 int main(int argc, char* argv[]) {
-  fem::math::Sparse a(10), b(10);
-  a(5, 5) = 55;
-  a(2, 8) = 28;
-  b(9, 1) = 91;
-  b(0, 4) = 4;
-  std::cout << a;
-  std::cout << a.size() << ';' << a.count() << ';' << a.count2() << '\n';
-  fem::math::Sparse c = a - a;
-  std::cout << c;
-  std::cout << c.size() << ';' << c.count() << ';' << c.count2() << '\n';
-
-  // uint64_t size = 5000;
-  // fem::image::Svg svg(size, size);
-  // fem::image::Figure tim(size, size);
-  // std::vector<std::array<double, 2>> points;
-  // std::array<double, C> times;
+  uint64_t size = 1000;
+  fem::image::Svg svga(size, size);
+  fem::image::Svg svgb(size, size);
+  std::vector<std::array<double, 2>> points;
+  std::vector<std::array<uint64_t, 2>> edges;
   // srand(time(NULL));
-  // for (uint64_t npoints = 3; npoints < C + 3; npoints += 1) {
-  //   points.clear();
-  //   for (uint64_t n = 0; n < npoints; ++n) {
-  //     points.push_back({{static_cast<double>(rand() % (size - 20)) + 10,
-  //                        static_cast<double>(rand() % (size - 20)) + 10}});
-  //   }
-  //   auto begin = std::chrono::high_resolution_clock::now();
-  //   fem::mesh::Mesh delaunay = fem::del::DelTri(points);
-  //   auto end = std::chrono::high_resolution_clock::now();
-  //   double dt =
-  //   std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count()
-  //   * 1.0e-9; std::cout << npoints << "->" << dt << '\n'; times[npoints - 3]
-  //   = dt;
+  srand(3141);
+  points.push_back({{100, 100}});
+  points.push_back({{900, 100}});
+  points.push_back({{100, 900}});
+  points.push_back({{900, 900}});
+  for (uint64_t n = 0; n < POINTS; ++n) {
+    points.push_back({{static_cast<double>(rand() % (size - 20)) + 10,
+                       static_cast<double>(rand() % (size - 20)) + 10}});
+  }
+  edges.push_back({{0, 1}});
+  edges.push_back({{2, 3}});
+  edges.push_back({{0, 3}});
+  // for (uint64_t n = 0; n < EDGES; ++n) {
+  //   edges.push_back({{static_cast<uint64_t>(rand() % POINTS),
+  //                     static_cast<uint64_t>(rand() % POINTS)}});
   // }
-  // tim.Line(fem::util::StepRangeArray<double, C>(3, C + 3), times, "", "", "",
-  // 5); tim.SavePgf("time.tikz"); tim.SaveSvg("time.svg"); return 0;
+  fem::mesh::Mesh dt = fem::del::DelTri(points);
+  fem::mesh::Mesh cdt = fem::del::ConDelTri(points, edges);
+  std::cout << "Saving Images\n";
+  svga.Fill("white");
+  svga.Mesh(dt, "black", "black", 4, 0, true);
+  svga.WriteSvg("dt.svg");
+  svgb.Fill("white");
+  svgb.Mesh(cdt, "black", "black", 4, 0, true);
+  for (auto& it : edges) {
+    svgb.Line(points[it[0]][0], points[it[0]][1], points[it[1]][0],
+              points[it[1]][1], "blue", 10, 4);
+  }
+  svgb.WriteSvg("cdt.svg");
+  return 0;
 }

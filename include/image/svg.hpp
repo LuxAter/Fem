@@ -51,16 +51,20 @@ namespace image {
                   std::string color = "#000000", uint32_t stroke = 1,
                   uint32_t dash = 0);
 
+    void Text(std::string msg, uint32_t x, uint32_t y,
+              std::string color = "#000000", std::string anchor = "middle");
+
     void Pslg(mesh::Pslg pslg, std::string edge = "#000000",
               std::string point = "#000000", std::string hole = "#ff0000",
               uint32_t stroke = 1);
     void Mesh(mesh::Mesh mesh, std::string edge = "#000000",
               std::string vertex = "#000000", uint32_t stroke = 1,
-              uint32_t dash = 0);
+              uint32_t dash = 0, bool label = false);
     void Triangles(std::vector<std::array<uint64_t, 3>>& triangles,
                    std::vector<std::array<double, 2>>& points,
                    std::string edge = "#000000", std::string vertex = "#000000",
-                   uint32_t stroke = 1, uint32_t dash = 0, double scale=1.0, double shift=0.0);
+                   uint32_t stroke = 1, uint32_t dash = 0, double scale = 1.0,
+                   double shift = 0.0);
 
 #ifdef _REENTRANT
     std::future<bool> WriteSvg(const std::string& file_path);

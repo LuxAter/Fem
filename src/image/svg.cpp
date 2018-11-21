@@ -22,11 +22,19 @@ bool WriteSvgFull(std::string file_path, std::size_t width_,
   fprintf(out, "<svg width=\"%lu\" height=\"%lu\">\n", width_, height_);
   for (auto& it : elements_) {
     std::string element = "  <" + it["type"] + " ";
-    for (auto& attr : it) {
-      if (attr.first == "type") continue;
-      element += attr.first + "=\"" + attr.second + "\" ";
+    if(it["type"] != "text"){
+      for (auto& attr : it) {
+        if (attr.first == "type") continue;
+        element += attr.first + "=\"" + attr.second + "\" ";
+      }
+      fprintf(out, "%s/>\n", element.c_str());
+    }else{
+      for (auto& attr : it) {
+        if (attr.first == "type" || attr.first == "string") continue;
+        element += attr.first + "=\"" + attr.second + "\" ";
+      }
+      fprintf(out, "%s>%s</text>", element.c_str(), it["string"].c_str());
     }
-    fprintf(out, "%s/>\n", element.c_str());
   }
   fprintf(out, "</svg>");
   fclose(out);
@@ -141,6 +149,16 @@ void fem::image::Svg::PolyLine(std::vector<std::array<double, 2>> points,
                        {"stroke-dasharray", std::to_string(dash)}});
 }
 
+void fem::image::Svg::Text(std::string msg, uint32_t x, uint32_t y,
+                           std::string color, std::string anchor) {
+  elements_.push_back({{"type", "text"},
+                       {"x", std::to_string(x)},
+                       {"y", std::to_string(y)},
+                       {"fill", color},
+                       {"text-anchor", anchor},
+                       {"string", msg}});
+}
+
 void fem::image::Svg::Pslg(mesh::Pslg pslg, std::string edge, std::string point,
                            std::string hole, uint32_t stroke) {
   for (auto& eg : pslg.edges) {
@@ -159,11 +177,25 @@ void fem::image::Svg::Pslg(mesh::Pslg pslg, std::string edge, std::string point,
 }
 
 void fem::image::Svg::Mesh(mesh::Mesh mesh, std::string edge,
-                           std::string vertex, uint32_t stroke, uint32_t dash) {
+                           std::string vertex, uint32_t stroke, uint32_t dash,
+                           bool label) {
   mesh.DeterminEdges();
   for (auto& eg : mesh.edges) {
     Line(mesh.points[eg[0]][0], mesh.points[eg[0]][1], mesh.points[eg[1]][0],
          mesh.points[eg[1]][1], edge, stroke, dash);
+  }
+  if (label) {
+    for (std::size_t i = 0; i < mesh.triangles.size(); ++i) {
+      double cx = (mesh.points[mesh.triangles[i][0]][0] +
+                   mesh.points[mesh.triangles[i][1]][0] +
+                   mesh.points[mesh.triangles[i][2]][0]) /
+                  3.0;
+      double cy = (mesh.points[mesh.triangles[i][0]][1] +
+                   mesh.points[mesh.triangles[i][1]][1] +
+                   mesh.points[mesh.triangles[i][2]][1]) /
+                  3.0;
+      Text(std::to_string(i), cx, cy);
+    }
   }
   if (stroke == 1) {
     stroke = 2;
