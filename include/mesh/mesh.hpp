@@ -7,25 +7,23 @@
 
 namespace fem {
 namespace mesh {
-  
-  // bool Contains(const std::array<std::size_t, 2>& edge, const std::size_t& vertex);
-  // bool Contains(const std::array<std::size_t, 3>& tri, const std::size_t& vertex);
-  // bool Contains(const std::array<std::size_t, 3>& tri, const std::array<std::size_t, 2>& edge);
-
   class Mesh {
    public:
     Mesh();
     Mesh(const Mesh& copy);
     Mesh(const std::vector<std::array<double, 2>>& points,
          const std::vector<std::array<std::size_t, 3>>& triangles);
+    Mesh(const std::vector<std::array<double, 2>>& points,
+         const std::vector<std::array<std::size_t, 3>>& triangles,
+         const std::vector<std::array<std::size_t, 3>>& adj);
 
     void DeterminEdges();
-    // bool CircumCircle(const std::size_t& tri, const std::array<double, 2>& pt) const;
-    // bool CircumCircle(const std::size_t& tri, const std::size_t& pt) const;
+    bool InMesh(const std::array<double, 2>& pt) const;
 
     std::vector<std::array<double, 2>> points;
     std::vector<std::array<std::size_t, 2>> edges;
     std::vector<std::array<std::size_t, 3>> triangles;
+    std::vector<std::array<std::size_t, 3>> adjacency;
    private:
   };
   Mesh operator*(const Mesh& lhs, const double& rhs);

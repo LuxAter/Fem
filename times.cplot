@@ -1,7 +1,0 @@
-# Title
-xaxis=(0,10,$x$,log)
-yaxis=(-10,10,$y$,fixed)
-: x^2
-$sin(x)$: sin(x)
-line: (0,0) (5,-4) (10,8) 
-

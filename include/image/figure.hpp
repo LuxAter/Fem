@@ -1,124 +1,83 @@
 #ifndef FEM_IMAGE_FIGURE_HPP_
 #define FEM_IMAGE_FIGURE_HPP_
 
-#include <cmath>
-#include <cstdint>
-
 #include <array>
+#include <cmath>
 #include <functional>
+#include <future>
 #include <vector>
 
-#include "svg.hpp"
-
-#include <iostream>
+#include "../mesh/mesh.hpp"
 
 namespace fem {
 namespace image {
-  inline std::string GenFileName(std::string base_name, std::string ext, uint64_t i){
-    char buff[255];
-    snprintf(buff, 255, "%s/%07lu%s.%s", base_name.c_str(), i, base_name.c_str(), ext.c_str());
-    return std::string(buff);
-  }
   class Figure {
    public:
-    Figure();
     Figure(const uint64_t& w, const uint64_t& h);
     Figure(const Figure& copy);
 
-    template <typename _T, std::size_t _N>
-    void Line(std::array<_T, _N> y);
-    template <typename _T, std::size_t _N>
-    void Line(std::array<_T, _N> x, std::array<_T, _N> y,
-              std::string color = "", std::string vertex_color = "",
-              std::string vertex_fill = "", uint32_t stroke = 1, uint32_t dash=0,
-              uint32_t vertex_r = 0) {
-      std::tuple<std::vector<std::array<double, 2>>, std::string, std::string,
-                 std::string, double, double, double>
-          local_plot;
-      if (color == "" && vertex_color == "" && vertex_fill == "") {
-        color = colors_[color_];
-        vertex_color = colors_[color_];
-        vertex_fill = colors_[color_];
-        color_ = (color_ + 1) % 18;
-      }
-      for (std::size_t i = 0; i < _N; ++i) {
-        double dx = static_cast<double>(x[i]);
-        double dy = static_cast<double>(y[i]);
-        // std::cout << x[i] << "->" << dx << "<<<\n";
-        bounds_[0] = std::min(bounds_[0], dx);
-        bounds_[1] = std::min(bounds_[1], dy);
-        bounds_[2] = std::max(bounds_[2], dx);
-        bounds_[3] = std::max(bounds_[3], dy);
-        std::get<0>(local_plot).push_back({{dx, dy}});
-      }
-      std::get<1>(local_plot) = color;
-      std::get<2>(local_plot) = vertex_color;
-      std::get<3>(local_plot) = vertex_fill;
-      std::get<4>(local_plot) = stroke;
-      std::get<5>(local_plot) = dash;
-      std::get<6>(local_plot) = vertex_r;
-      line_.push_back(local_plot);
-    }
+    void SetCmap(const std::string& cmap);
+    void SetSpacing(const double& spacing);
+    void SetBackground(const uint32_t& rgb);
 
-    template <typename _T, std::size_t _N>
-    void Scatter(std::array<_T, _N> y);
-    template <typename _T, std::size_t _N>
-    void Scatter(std::array<_T, _N> x, std::array<_T, _N> y,
-                 std::string color = "", std::string fill = "",
-                 uint32_t stroke = 1, uint32_t r = 1) {
-      std::tuple<std::vector<std::array<double, 2>>, std::string, std::string,
-                 double, double>
-          local_plot;
-      if (color == "" && fill == "") {
-        color = colors_[color_];
-        fill = colors_[color_];
-        color_ = (color_ + 1) % 18;
-      }
-      for (std::size_t i = 0; i < _N; ++i) {
-        double dx = static_cast<double>(x[i]);
-        double dy = static_cast<double>(y[i]);
-        bounds_[0] = std::min(bounds_[0], dx);
-        bounds_[1] = std::min(bounds_[1], dy);
-        bounds_[2] = std::max(bounds_[2], dx);
-        bounds_[3] = std::max(bounds_[3], dy);
-        std::get<0>(local_plot).push_back({{dx, dy}});
-      }
-      std::get<1>(local_plot) = color;
-      std::get<2>(local_plot) = fill;
-      std::get<3>(local_plot) = stroke;
-      std::get<4>(local_plot) = r;
-      scatter_.push_back(local_plot);
-    }
+    void Rectangle(const std::function<double(double, double)>& func,
+                   const double& x, const double& y, const double& w,
+                   const double& h, double vmin = -INFINITY,
+                   double vmax = INFINITY);
+    void Circle(const std::function<double(double, double)>& func,
+                const double& cx, const double& cy, const double& r,
+                double vmin = -INFINITY, double vmax = INFINITY);
+    void Mesh(const std::function<double(double, double)>& func,
+              const fem::mesh::Mesh& mesh, double vmin = -INFINITY,
+              double vmax = INFINITY);
 
-    void SaveSvg(const std::string& file);
-    void SavePgf(const std::string& file);
+    void OverlayCircle(int cx, int cy, int r, uint32_t color = 0x000000);
+    void OverlayLine(int x0, int y0, int x1, int y1, uint8_t size = 1, uint32_t color = 0x000000);
+    void OverlayLineHigh(int x0, int y0, int x1, int y1, uint8_t size = 1, uint32_t color = 0x000000);
+    void OverlayLineLow(int x0, int y0, int x1, int y1, uint8_t size = 1, uint32_t color = 0x000000);
+    void OverlayGrid(uint32_t x_steps, uint32_t y_steps, uint8_t size = 1,
+                     uint32_t color = 0x000000);
+    void OverlayMesh(fem::mesh::Mesh& mesh, uint8_t size = 1,
+                     uint32_t color = 0x000000);
+
+#ifdef _REENTRANT
+    std::future<bool> WritePng(const std::string& file_path);
+#else
+    bool WritePng(const std::string& file_path);
+#endif
+    bool WritePngWait(const std::string& file_path);
 
    private:
-    void PlotScatter(
-        Svg& svg,
-        const std::tuple<std::vector<std::array<double, 2>>, std::string,
-                         std::string, double, double>& scatter);
-    void PlotLine(
-        Svg& svg,
-        const std::tuple<std::vector<std::array<double, 2>>, std::string,
-                         std::string, std::string, double, double, double>& line);
-
     uint64_t width_, height_;
-    uint8_t color_;
+    std::string cmap_ = "viridis";
+    double spacing_ = 0.05;
+    uint32_t background_ = 0xffffff;
+    std::array<double, 2> bounds_ = {{INFINITY, -INFINITY}};
+    std::vector<std::vector<double>> data_;
+    std::vector<std::vector<int64_t>> overlay_;
 
-    std::array<std::string, 18> colors_ = {
-        {"#2196F3", "#4CAF50", "#FFC107", "#F44336", "#3F51B5", "#57C7B8",
-         "#FFEB3B", "#795548", "#673AB7", "#00BCD4", "#CDDC39", "#FF5722",
-         "#9C27B0", "#03A9F4", "#8BC34A", "#FF9800", "#E91E63"}};
-
-    std::array<double, 4> bounds_;
-
-    std::vector<std::tuple<std::vector<std::array<double, 2>>, std::string,
-                           std::string, double, double>>
-        scatter_;
-    std::vector<std::tuple<std::vector<std::array<double, 2>>, std::string,
-                           std::string, std::string, double, double, double>>
-        line_;
+    inline uint64_t LimitPixel(int64_t v, int64_t min_v, int64_t max_v) const {
+      return std::min(std::max(v, min_v), max_v - 1);
+    }
+    inline uint32_t ConvertRgb(const uint8_t& r, const uint8_t& g,
+                               const uint8_t& b) const {
+      return (((static_cast<uint32_t>(r) << 8) + static_cast<uint32_t>(g))
+              << 8) +
+             static_cast<uint32_t>(b);
+    }
+    inline uint32_t ConvertRgb(const double& r, const double& g,
+                               const double& b) const {
+      return ConvertRgb(static_cast<uint8_t>(r * 255),
+                        static_cast<uint8_t>(g * 255),
+                        static_cast<uint8_t>(b * 255));
+    }
+    inline uint32_t ConvertRgb(const std::array<double, 3>& rgb) const {
+      return ConvertRgb(rgb[0], rgb[1], rgb[2]);
+    }
+    std::array<double, 3> CmapLookUp(
+        const double& z, const std::vector<std::array<double, 3>>& cmap) const;
+    std::vector<std::array<double, 3>> LoadCmap(const std::string& cmap) const;
+    std::vector<std::vector<uint32_t>> GenFrameBuffer() const;
   };
 }  // namespace image
 }  // namespace fem

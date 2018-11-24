@@ -8,7 +8,7 @@
 
 #include "mesh/mesh.hpp"
 
-#include "image/figure.hpp"
+#include "image/figure1d.hpp"
 #include "image/svg.hpp"
 
 fem::mesh::Mesh fem::del::DelTri(std::vector<std::array<double, 2>> points) {
@@ -32,7 +32,7 @@ fem::mesh::Mesh fem::del::DelTri(std::vector<std::array<double, 2>> points) {
     pt[0] = pt[0] * dmax + bounds[0];
     pt[1] = pt[1] * dmax + bounds[1];
   }
-  fem::mesh::Mesh delaunay_mesh(points, delaunay.first);
+  fem::mesh::Mesh delaunay_mesh(points, delaunay.first, delaunay.second);
   return delaunay_mesh;
 }
 
@@ -507,6 +507,7 @@ fem::del::ConDelaun(std::vector<std::array<double, 2>> points,
     }
   }
 
+  return std::make_pair(vrt, adj);
   // REMOVE SUPER TRI
   uint64_t tri;
   for (tri = 0; tri < vrt.size(); ++tri) {

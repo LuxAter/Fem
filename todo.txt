@@ -1,0 +1,4 @@
+[  ] CDT
+[  ] Minimal Risidual matrix solving
+[  ] Global matrix generation
+[  ] Saving flobal approximation function to file

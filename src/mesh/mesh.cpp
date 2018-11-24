@@ -6,30 +6,16 @@
 
 #include <iostream>
 
-// bool fem::mesh::Contains(const std::array<std::size_t, 2>& edge,
-//                          const std::size_t& vertex) {
-//   return edge[0] == vertex || edge[1] == vertex;
-// }
-// bool fem::mesh::Contains(const std::array<std::size_t, 3>& tri,
-//                          const std::size_t& vertex) {
-//   return tri[0] == vertex || tri[1] == vertex || tri[2] == vertex;
-// }
-// bool fem::mesh::Contains(const std::array<std::size_t, 3>& tri,
-//                          const std::array<std::size_t, 2>& edge) {
-//   return (tri[0] == edge[0] && tri[1] == edge[1]) ||
-//          (tri[1] == edge[0] && tri[2] == edge[1]) ||
-//          (tri[2] == edge[0] && tri[0] == edge[1]) ||
-//          (tri[0] == edge[1] && tri[1] == edge[0]) ||
-//          (tri[1] == edge[1] && tri[2] == edge[0]) ||
-//          (tri[2] == edge[1] && tri[0] == edge[0]);
-// }
-
 fem::mesh::Mesh::Mesh() {}
 fem::mesh::Mesh::Mesh(const Mesh& copy)
     : points(copy.points), triangles(copy.triangles) {}
 fem::mesh::Mesh::Mesh(const std::vector<std::array<double, 2>>& points,
                       const std::vector<std::array<std::size_t, 3>>& triangles)
     : points(points), triangles(triangles) {}
+fem::mesh::Mesh::Mesh(const std::vector<std::array<double, 2>>& points,
+                      const std::vector<std::array<std::size_t, 3>>& triangles,
+                      const std::vector<std::array<std::size_t, 3>>& adj)
+    : points(points), triangles(triangles), adjacency(adj) {}
 
 void fem::mesh::Mesh::DeterminEdges() {
   for (auto& tri : triangles) {
@@ -52,24 +38,27 @@ void fem::mesh::Mesh::DeterminEdges() {
     if (!c_in) edges.push_back(c);
   }
 }
-// bool fem::mesh::Mesh::CircumCircle(const std::size_t& tri,
-//                                    const std::array<double, 2>& pt) const {
-//   double x13 = points[triangles[tri][0]][0] - points[triangles[tri][2]][0];
-//   double y13 = points[triangles[tri][0]][1] - points[triangles[tri][2]][1];
-//   double x23 = points[triangles[tri][1]][0] - points[triangles[tri][2]][0];
-//   double y23 = points[triangles[tri][1]][1] - points[triangles[tri][2]][1];
-//   double x1p = points[triangles[tri][0]][0] - pt[0];
-//   double y1p = points[triangles[tri][0]][1] - pt[1];
-//   double x2p = points[triangles[tri][1]][0] - pt[0];
-//   double y2p = points[triangles[tri][1]][1] - pt[1];
-//   return (x13 * x23 + y13 * y23) * (x2p * y1p - x1p * y2p) <
-//          (x23 * y13 - x13 * y23) * (x2p * x1p + y1p * y2p);
-// }
-//
-// bool fem::mesh::Mesh::CircumCircle(const std::size_t& tri,
-//                                    const std::size_t& pt) const {
-//   return CircumCircle(tri, points[pt]);
-// }
+
+bool fem::mesh::Mesh::InMesh(const std::array<double, 2>& pt) const {
+  uint64_t tri = triangles.size() - 1;
+  bool searching = true;
+  while (searching == true) {
+    bool within = true;
+    for (uint64_t i = 0; i < 3; ++i) {
+      uint64_t v1 = triangles[tri][i];
+      uint64_t v2 = triangles[tri][(i + 1) % 3];
+      if ((points[v1][1] - pt[1]) * (points[v2][0] - pt[0]) >
+          (points[v1][0] - pt[0]) * (points[v2][1] - pt[1])) {
+        tri = adjacency[tri][i];
+        within = false;
+      }
+    }
+    if (within == true || tri == 0) {
+      searching = false;
+    }
+  }
+  return (tri == 0) ? false : true;
+}
 
 fem::mesh::Mesh fem::mesh::operator*(const Mesh& lhs, const double& rhs) {
   Mesh mesh = lhs;
@@ -99,7 +88,6 @@ fem::mesh::Mesh fem::mesh::LoadMesh(const std::string& file) {
     fscanf(load, "%lu %lu %lu", &a, &b, &c);
     mesh.triangles.push_back(std::array<std::size_t, 3>{{a, b, c}});
   }
-  // mesh.DeterminEdges();
   fclose(load);
   return mesh;
 }

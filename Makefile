@@ -6,10 +6,10 @@ endif
 ROOT=$(shell pwd)
 CXX=clang++
 CXXFLAGS=-std=c++17 -fPIC -Wall -Wpedantic --static
-LINK=-lz
+LINK=-lz -lfreetype
 SOURCE=src
 INCLUDE_DIR=include
-# INCLUDE=-I$(ROOT)/build/libpng.a/include
+INCLUDE=-I$(ROOT)/build/libpng.a/include -I/usr/include/freetype2
 BUILD=build
 COMMON_INCLUDE=-I$(ROOT)/$(INCLUDE_DIR) $(INCLUDE)
 
@@ -108,7 +108,7 @@ LIBFEM.A_FILES=$(filter-out src/main.cpp, $(shell find "src/" -name "*.cpp"))
 LIBFEM.A_OBJS=$(LIBFEM.A_FILES:%=$(ROOT)/$(BUILD)/%.o)
 -include $(LIBFEM.A_OBJS:.o=.d)
 
-build-libfem.a: pre-libfem.a $(LIBFEM.A)
+build-libfem.a: build-libpng.a pre-libfem.a $(LIBFEM.A)
 	$(call complete_target,$(shell basename $(LIBFEM.A)))
 
 clean-libfem.a: clean-libpng.a
@@ -121,6 +121,7 @@ pre-libfem.a:
 $(LIBFEM.A): $(LIBFEM.A_OBJS)
 	$(call print_link_lib,$(shell basename $(LIBFEM.A)))
 	ar rcs $@ $(LIBFEM.A_OBJS)
+	mkdir -p $(ROOT)/tmp/libpng.a && cd $(ROOT)/tmp/libpng.a && ar x $(ROOT)/build/libpng.a/lib/libpng.a && ar qc $(ROOT)/$@ $(ROOT)/tmp/libpng.a/*.o && rm -rf $(ROOT)/tmp/libpng.a
 
 install-libfem.a: build-libfem.a
 	$(call install_target,$(shell basename $(LIBFEM.A)))
