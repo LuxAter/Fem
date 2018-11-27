@@ -5,49 +5,40 @@
 #include <functional>
 
 #include "data/json.hpp"
-#include "image/figure1d.hpp"
 #include "image/figure.hpp"
+#include "image/figure1d.hpp"
 #include "image/svg.hpp"
-#include "math/matrix.hpp"
 #include "math/sparse.hpp"
 #include "mesh/delaunay.hpp"
+#include "mesh/quad_tree.hpp"
 #include "util/range.hpp"
 
 using namespace fem::math;
 using namespace fem::data;
 
-#define POINTS 100
+#define POINTS 10000
 #define EDGES 100
 #define S 10
 
-double func(double x, double y){
+double func(double x, double y) {
   // return sqrt(pow(x, 2) + pow(y, 2));
-  return pow(x,3)-3*x*pow(y,2);
+  return pow(x, 3) - 3 * x * pow(y, 2);
   // return sin(0.05*sqrt(pow(x - 500,2)+pow(y - 500,2)));
   // return tan(sqrt(pow(x,2)+pow(y,2)));
 }
-double rad(double r, double theta){
-  return r * sin(10 * theta);
-}
+double rad(double r, double theta) { return r * sin(10 * theta); }
 
 int main(int argc, char* argv[]) {
-  // TODO 2D mesh based ploting
-  uint64_t size = 1000;
-  // srand(time(NULL));
-  std::vector<std::array<double, 2>> points;
-  for (uint64_t n = 0; n < POINTS; ++n) {
-    points.push_back({{static_cast<double>(rand() % size),
-                       static_cast<double>(rand() % size)}});
-  }
-  // fem::image::Svg svg(1000, 1000);
-  fem::mesh::Mesh dt = fem::del::DelTri(points);
-  fem::image::Figure fig(1000, 1000);
-  // fig.Mesh(func, dt);
-  // fig.OverlayMesh(dt);
-  fig.Rectangle(func, -5, -5, 10, 10, -50, 50);
-  fig.WritePngWait("testing.png");
-  return 0;
 
+  // uint64_t size = 1000;
+  // srand(time(NULL));
+  // std::vector<std::array<double, 2>> points;
+  // for (uint64_t n = 0; n < POINTS; ++n) {
+  //   points.push_back({{static_cast<double>(rand() % size),
+  //                      static_cast<double>(rand() % size)}});
+  // }
+  // fem::mesh::Mesh dt = fem::del::DelTri(points);
+  // return 0;
 
   // TODO implement boundary conditions
   // uint64_t size = 1000;
