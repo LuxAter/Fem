@@ -249,7 +249,8 @@ def generate_pslg():
         elif act[0] == 2:
             pts = []
             for theta in linspace(0.0, 6.283184, act[4]):
-                points.append((act[3] * cos(theta), act[3] * sin(theta)))
+                points.append((act[1] + (act[3] * cos(theta)),
+                               act[2] + (act[3] * sin(theta))))
                 pts.append(points[-1])
                 edges.append((len(points) - 1, len(points)))
             if act[5]:
@@ -308,8 +309,11 @@ def generate_pdf():
             file.write('<circle cx="{}" cy="{}" r="2" color="black" />'.format(
                 int((pt[0] - min_pt[0]) * 100), int((pt[1] - min_pt[1]) * 100)))
         for hl in holes:
-            file.write('<circle cx="{}" cy="{}" r="3" stroke="red" fill="red" />'.format(
-                int((hl[0] - min_pt[0]) * 100), int((hl[1] - min_pt[0]) * 100)))
+            file.write(
+                '<circle cx="{}" cy="{}" r="3" stroke="red" fill="red" />'.
+                format(
+                    int((hl[0] - min_pt[0]) * 100),
+                    int((hl[1] - min_pt[0]) * 100)))
         file.write('</svg>')
     subprocess.run(
         ['rsvg-convert', '-f', 'pdf', '-o', '.pslg.pdf', '.pslg.svg'])
@@ -320,21 +324,117 @@ def generate_pdf():
 
 
 def display_help(target):
-    print("HELP:{}".format(target))
+    if target:
+        target = target.strip()
+    print("\033[1m                                      HELP\033[0m")
+    print("\033[1m==============================================================================\033[0m")
+    if target in ('help', '?') or target is None:
+        print("\033[1;95mhelp, ?\033[0m  Displays this help text")
+        print("Commands:")
+        print("  help ?")
+        print("  quit exit")
+        print("  save :w")
+        print("  shape size")
+        print("  point p")
+        print("  circle c")
+        print("  rect r")
+        print("  tri t")
+        print("  list l")
+        print("  delete d")
+        print("  gen pdf view")
+    elif target in ('quit', 'exit'):
+        print(
+"\033[1;91mquit[()], exit[()]\033[0m  Closes the program and removes temporary files. If files\n" +
+"                   have not been saved they will be lost.")
+    elif target in ('save', ':w'):
+        print(
+"\033[1;92msave FILE, :w FILE\033[0m  Saves PSLG to the specified file path. The PSLG is\n" +
+"                    resized and translated to be within the range [-1,1].\n" +
+"                    This removes a later step in the process for the mesh\n" +
+"                    generation."
+                )
+    elif target in ('shape', 'size'):
+        print(
+"\033[1;93mshape W H, size W H\033[0m  Resizes the domain for the point generation. This is\n" +
+"                     applied in the order that it is called, resizing all\n"+
+"                     previously generated points."
+                )
+    elif target in ('point', 'p'):
+        print(
+"\033[1;94mpoint,p X Y\033[0m  Generates a point at the given (X,Y) coordinates."
+                )
+    elif target in ('circle', 'c'):
+        print(
+"\033[1;94mcircle, c CX CY R N V\033[0m  Generates a circle centered at point (X,Y) with radius\n"+
+"                       R. The number of points generated is equal to N. If V\n"+
+"                       is set to T then a hole marker is generated at the\n"+
+"                       center of the circle."
+                )
+    elif target in ('rect', 'r'):
+        print(
+"\033[1;94mrectangle,rect,r X Y W H V\033[0m  Generates a rectangle with the top left vertex\n"+
+"                            at (X,Y) a width of W and a height of H. If V is\n"+
+"                            set to T then a hole marker is generated at the\n"+
+"                            center of the rectangle."
+                )
+    elif target in ('tri', 't'):
+        print(
+"\033[1;94mtriangle,tri,t X1 Y1 X2 Y2 X3 Y3 V\033[0m  Generates a triangle with verticies\n"+
+"                                    located at (X1,Y1), (X2,Y2) and (X3,Y3).\n"+
+"                                    If V is set to T then a hole marker is\n"+
+"                                    generated at the center of the triangle."
+                )
+    elif target in ('list', 'l'):
+        print(
+"\033[1;95mlist,l\033[0m  Prints a list of all past actions that were used to generate the\n"+
+"        current PSLG"
+                )
+    elif target in ('delete', 'd'):
+        print(
+"\033[1;91mdelete,d ID\033[0m  Deletes the action located at ID in the action history. This\n"+
+"             will remove that action from the PSLG."
+                )
+    elif target in ('gen', 'pdf', 'view'):
+        print(
+"\033[1;92mgen,pdf,view\033[0m  Opens a live updating viewer to preview the PSLG."
+                )
 
 
 def save(file):
     print("\033[1m     Generating PSLG\033[0m")
     print("\033[1m=========================\033[0m")
-    size, pts, edges, holes = generate_pslg()
-    from pprint import pprint
-    pprint(pts)
-    pprint(edges)
-    pprint(holes)
-
-
-def load(file):
-    print("LOAD:{}".format(file))
+    size, pts, edges, hls = generate_pslg()
+    points = []
+    holes = []
+    bounds = [1000000, 1000000, -1000000, -1000000]
+    for pt in pts:
+        bounds[0] = min(bounds[0], pt[0])
+        bounds[1] = min(bounds[1], pt[1])
+        bounds[2] = max(bounds[2], pt[0])
+        bounds[3] = max(bounds[3], pt[1])
+    for pt in hls:
+        bounds[0] = min(bounds[0], pt[0])
+        bounds[1] = min(bounds[1], pt[1])
+        bounds[2] = max(bounds[2], pt[0])
+        bounds[3] = max(bounds[3], pt[1])
+    c_x = bounds[0] + ((bounds[2] - bounds[0]) / 2)
+    s_x = 1.0 / (c_x - bounds[0])
+    c_y = bounds[1] + ((bounds[3] - bounds[1]) / 2)
+    s_y = 1.0 / (c_y - bounds[1])
+    for pt in pts:
+        points.append(((pt[0] - c_x) * s_x, (pt[1] - c_y) * s_y))
+    for pt in hls:
+        holes.append(((pt[0] - c_x) * s_x, (pt[1] - c_y) * s_y))
+    with open(file.strip() + '.pslg', 'w') as out:
+        out.write("{}\n".format(len(points)))
+        for pt in points:
+            out.write("{:f} {:f} ".format(pt[0], pt[1]))
+        out.write("\n{}\n".format(len(edges)))
+        for eg in edges:
+            out.write("{} {} ".format(eg[0], eg[1]))
+        out.write("\n{}\n".format(len(holes)))
+        for pt in holes:
+            out.write("{:f} {:f} ".format(pt[0], pt[1]))
 
 
 def fmt_action(act):
@@ -369,8 +469,6 @@ def handle_action(tokens):
         save(tokens[1][1])
     elif tokens[0][0] == Tk.SAVE and tokens[0][1] in ("gen", "pdf", "view"):
         generate_pdf()
-    elif tokens[0][0] == Tk.LOAD and tokens[1][1]:
-        load(tokens[1][1])
     elif tokens[0][0] == Tk.SHAPE and tokens[1][1] and tokens[2][1]:
         ACTIONS.append([0, float(tokens[1][1]), float(tokens[2][1])])
     elif tokens[0][0] == Tk.LIST:
@@ -425,8 +523,11 @@ def main():
     action = Tk.NULL
     while action != Tk.QUIT:
         tokens, _ = parser(prompt())
-        action = tokens[0][0]
-        handle_action(tokens)
+        if not tokens:
+            print("\033[1;31mInvalid command\033[0m")
+        else:
+            action = tokens[0][0]
+            handle_action(tokens)
     if os.path.isfile('.pslg.svg'):
         os.remove('.pslg.svg')
     if os.path.isfile('.pslg.pdf'):
