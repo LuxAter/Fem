@@ -22,13 +22,13 @@ bool WriteSvgFull(std::string file_path, std::size_t width_,
   fprintf(out, "<svg width=\"%lu\" height=\"%lu\">\n", width_, height_);
   for (auto& it : elements_) {
     std::string element = "  <" + it["type"] + " ";
-    if(it["type"] != "text"){
+    if (it["type"] != "text") {
       for (auto& attr : it) {
         if (attr.first == "type") continue;
         element += attr.first + "=\"" + attr.second + "\" ";
       }
       fprintf(out, "%s/>\n", element.c_str());
-    }else{
+    } else {
       for (auto& attr : it) {
         if (attr.first == "type" || attr.first == "string") continue;
         element += attr.first + "=\"" + attr.second + "\" ";
@@ -178,8 +178,31 @@ void fem::image::Svg::Pslg(mesh::Pslg pslg, std::string edge, std::string point,
 
 void fem::image::Svg::Mesh(mesh::Mesh mesh, std::string edge,
                            std::string vertex, uint32_t stroke, uint32_t dash,
-                           bool label) {
+                           bool label, bool center, bool flip) {
   mesh.DeterminEdges();
+  if (center) {
+    std::array<double, 2> range_x = {{INFINITY, -INFINITY}};
+    std::array<double, 2> range_y = {{INFINITY, -INFINITY}};
+    for (auto& pt : mesh.points) {
+      range_x[0] = std::min(range_x[0], pt[0]);
+      range_x[1] = std::max(range_x[1], pt[0]);
+      range_y[0] = std::min(range_y[0], pt[1]);
+      range_y[1] = std::max(range_y[1], pt[1]);
+    }
+    std::array<double, 2> center = {
+        {(range_x[1] + range_x[0]) / 2.0, (range_y[1] + range_y[0]) / 2.0}};
+    center[0] = (width_ / 2.0) - center[0];
+    center[1] = (height_ / 2.0) - center[1];
+    for(auto& pt : mesh.points){
+      pt[0] += center[0];
+      pt[1] += center[1];
+    }
+  }
+  if(flip){
+    for(auto& pt : mesh.points){
+      pt[1] = height_ - pt[1];
+    }
+  }
   for (auto& eg : mesh.edges) {
     Line(mesh.points[eg[0]][0], mesh.points[eg[0]][1], mesh.points[eg[1]][0],
          mesh.points[eg[1]][1], edge, stroke, dash);

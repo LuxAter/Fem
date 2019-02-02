@@ -5,6 +5,8 @@
 
 #include <array>
 #include <functional>
+#include <iostream>
+#include <sstream>
 #include <vector>
 
 #include "image/svg.hpp"
@@ -58,25 +60,48 @@ void fem::image::Figure1D::SaveSvg(const std::string& file) {
 }
 
 void fem::image::Figure1D::SavePgf(const std::string& file) {
-  std::string pre = "\\begin{tikzpicture}\n";
+  std::string pre = "\\begin{tikzpicture}[scale=0.8]\n";
   char buff[256];
-  snprintf(buff, 255, "\\begin{axis}[xmin=%lf, xmax=%lf, ymin=%lf, ymax=%lf]\n",
-           bounds_[0], bounds_[2], bounds_[1], bounds_[3]);
+  std::string xmin, xmax, ymin, ymax;
+  std::stringstream ss;
+  ss << bounds_[0];
+  xmin = ss.str();
+  ss.str("");
+  ss << bounds_[2];
+  xmax = ss.str();
+  ss.str("");
+  ss << bounds_[1];
+  ymin = ss.str();
+  ss.str("");
+  ss << bounds_[3];
+  ymax = ss.str();
+  ss.str("");
+  // snprintf(buff, 255, "\\begin{axis}[axis lines=middle, xmin=%lf, xmax=%lf,
+  // ymin=%lf, ymax=%lf]\n",
+  //          bounds_[0], bounds_[2], bounds_[1], bounds_[3]);
+  snprintf(
+      buff, 255,
+      "\\begin{axis}[axis lines=middle, xmin=%s, xmax=%s, ymin=%s, ymax=%s]\n",
+      xmin.c_str(), xmax.c_str(), ymin.c_str(), ymax.c_str());
   std::string axis(buff);
   std::string plots = "";
-  std::string post="\\end{axis}\n\\end{tikzpicture}";
+  std::string post = "\\end{axis}\n\\end{tikzpicture}";
   uint32_t color_index = 0;
   for (auto& it : line_) {
     uint32_t r = 0, g = 0, b = 0;
     sscanf(std::get<1>(it).c_str(), "#%02x%02x%02x", &r, &g, &b);
-    // std::cout << std::get<1>(it) << "->" << r << ',' << g << ',' << b << '\n';
-    snprintf(buff, 255, "\\definecolor{color%u}{RGB}{%u,%u,%u}\n", color_index, r, g, b);
+    snprintf(buff, 255, "\\definecolor{color%u}{RGB}{%u,%u,%u}\n", color_index,
+             r, g, b);
     pre += std::string(buff);
     std::string opt = std::get<5>(it) != 0 ? "dashed, " : "";
-    snprintf(buff, 255, "\\addplot[color%u, %s forget plot]\ntable{%%\n", color_index, opt.c_str());
+    snprintf(buff, 255, "\\addplot[color%u, %s forget plot]\ntable{%%\n",
+             color_index, opt.c_str());
     std::string plot(buff);
     for (auto& pt : std::get<0>(it)) {
-      plot += std::to_string(pt[0]) + ' ' + std::to_string(pt[1]) + '\n';
+      ss << pt[0] << ' ' << pt[1] << '\n';
+      plot += ss.str();
+      ss.str("");
+      // plot += std::to_string(pt[0]) + ' ' + std::to_string(pt[1]) + '\n';
     }
     plot += "};\n";
     plots += plot;

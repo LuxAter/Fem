@@ -1049,18 +1049,25 @@ def main():
     #     result += "{{{{{}, {}, {}}}}},".format(rgb[0], rgb[1], rgb[2])
     # result = result[:-1] + "};"
     # print(result)
-    for r, g, b in _magma_data:
-        print("\033[48;2;{};{};{}m ".format(int(r*255),int(g*255),int(b*255)), end='')
-    print("")
-    for r, g, b in _inferno_data:
-        print("\033[48;2;{};{};{}m ".format(int(r*255),int(g*255),int(b*255)), end='')
-    print("")
-    for r, g, b in _plasma_data:
-        print("\033[48;2;{};{};{}m ".format(int(r*255),int(g*255),int(b*255)), end='')
-    print("")
-    for r, g, b in _viridis_data:
-        print("\033[48;2;{};{};{}m ".format(int(r*255),int(g*255),int(b*255)), end='')
-    print("")
+
+    result = "std::vector<std::array<double, 3>> grey{"
+    for rgb  in range(256):
+        result += "{{{{{}, {}, {}}}}},".format(rgb/ 256, rgb/256, rgb/256)
+    result = result[:-1] + "};"
+    print(result)
+
+    # for r, g, b in _magma_data:
+    #     print("\033[48;2;{};{};{}m ".format(int(r*255),int(g*255),int(b*255)), end='')
+    # print("")
+    # for r, g, b in _inferno_data:
+    #     print("\033[48;2;{};{};{}m ".format(int(r*255),int(g*255),int(b*255)), end='')
+    # print("")
+    # for r, g, b in _plasma_data:
+    #     print("\033[48;2;{};{};{}m ".format(int(r*255),int(g*255),int(b*255)), end='')
+    # print("")
+    # for r, g, b in _viridis_data:
+    #     print("\033[48;2;{};{};{}m ".format(int(r*255),int(g*255),int(b*255)), end='')
+    # print("")
 
 if __name__ == "__main__":
     main()

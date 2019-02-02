@@ -21,14 +21,23 @@ using namespace fem::data;
 #define S 10
 
 double func(double x, double y) {
-  // return sqrt(pow(x, 2) + pow(y, 2));
-  return pow(x, 3) - 3 * x * pow(y, 2);
+  return sqrt(pow(x, 2) + pow(y, 2));
+  // return pow(x, 3) - 3 * x * pow(y, 2);
+  // return pow(x,3)-3*x*pow(y,2);
   // return sin(0.05*sqrt(pow(x - 500,2)+pow(y - 500,2)));
   // return tan(sqrt(pow(x,2)+pow(y,2)));
 }
 double rad(double r, double theta) { return r * sin(10 * theta); }
 
 int main(int argc, char* argv[]) {
+
+  fem::image::Figure fig(500, 500);
+  fem::image::Svg svg(500, 500);
+  // fig.Rectangle(func, -5, -5, 10, 10, -50, 50);
+  fem::mesh::Mesh mesh = fem::mesh::Flip(fem::mesh::LoadTriangleMesh("resources/A.1"));
+  fig.Mesh(func, mesh);
+  fig.OverlayMesh(mesh);
+  fig.WritePng("func.png");
 
   // uint64_t size = 1000;
   // srand(time(NULL));

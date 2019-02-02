@@ -58,8 +58,9 @@ namespace image {
               std::string point = "#000000", std::string hole = "#ff0000",
               uint32_t stroke = 1);
     void Mesh(mesh::Mesh mesh, std::string edge = "#000000",
-              std::string vertex = "#000000", uint32_t stroke = 1,
-              uint32_t dash = 0, bool label = false);
+              std::string vertex = "#000000", uint32_t stroke = 2,
+              uint32_t dash = 0, bool label = false, bool center = true,
+              bool flip = false);
     void Triangles(std::vector<std::array<uint64_t, 3>>& triangles,
                    std::vector<std::array<double, 2>>& points,
                    std::string edge = "#000000", std::string vertex = "#000000",

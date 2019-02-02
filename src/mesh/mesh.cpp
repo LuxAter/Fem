@@ -3,6 +3,7 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <cmath>
 
 #include <iostream>
 
@@ -40,24 +41,49 @@ void fem::mesh::Mesh::DeterminEdges() {
 }
 
 bool fem::mesh::Mesh::InMesh(const std::array<double, 2>& pt) const {
-  uint64_t tri = triangles.size() - 1;
-  bool searching = true;
-  while (searching == true) {
-    bool within = true;
-    for (uint64_t i = 0; i < 3; ++i) {
-      uint64_t v1 = triangles[tri][i];
-      uint64_t v2 = triangles[tri][(i + 1) % 3];
-      if ((points[v1][1] - pt[1]) * (points[v2][0] - pt[0]) >
-          (points[v1][0] - pt[0]) * (points[v2][1] - pt[1])) {
-        tri = adjacency[tri][i];
-        within = false;
-      }
-    }
-    if (within == true || tri == 0) {
-      searching = false;
+  return true;
+  for (auto& tri : triangles) {
+    double Area =
+        0.5 * (-points[tri[1]][1] * points[tri[2]][0] +
+               points[tri[0]][1] * (-points[tri[1]][0] + points[tri[2]][0]) +
+               points[tri[0]][0] * (points[tri[1]][1] - points[tri[2]][1]) +
+               points[tri[1]][0] * points[tri[2]][1]);
+    double s = 1 / (2 * Area) *
+               (points[tri[0]][1] * points[tri[2]][0] -
+                points[tri[0]][0] * points[tri[2]][1] +
+                (points[tri[2]][1] - points[tri[0]][1]) * pt[0] +
+                (points[tri[0]][0] - points[tri[2]][0]) * pt[1]);
+    double t = 1 / (2 * Area) *
+               (points[tri[0]][0] * points[tri[1]][1] -
+                points[tri[0]][1] * points[tri[1]][0] +
+                (points[tri[0]][1] - points[tri[1]][1]) * pt[0] +
+                (points[tri[1]][0] - points[tri[0]][0]) * pt[1]);
+    if (s > 0 && t > 0 && (1 - s - t) > 0) {
+      return true;
     }
   }
-  return (tri == 0) ? false : true;
+  return false;
+  // TODO Use this mesh traversal search, it is much better!
+  //
+  //
+  // uint64_t tri = triangles.size() - 1;
+  // bool searching = true;
+  // while (searching == true) {
+  //   bool within = true;
+  //   for (uint64_t i = 0; i < 3; ++i) {
+  //     uint64_t v1 = triangles[tri][i];
+  //     uint64_t v2 = triangles[tri][(i + 1) % 3];
+  //     if ((points[v1][1] - pt[1]) * (points[v2][0] - pt[0]) >
+  //         (points[v1][0] - pt[0]) * (points[v2][1] - pt[1])) {
+  //       tri = adjacency[tri][i];
+  //       within = false;
+  //     }
+  //   }
+  //   if (within == true || tri == 0) {
+  //     searching = false;
+  //   }
+  // }
+  // return (tri == 0) ? false : true;
 }
 
 fem::mesh::Mesh fem::mesh::operator*(const Mesh& lhs, const double& rhs) {
@@ -65,6 +91,14 @@ fem::mesh::Mesh fem::mesh::operator*(const Mesh& lhs, const double& rhs) {
   for (auto& it : mesh.points) {
     it[0] *= rhs;
     it[1] *= rhs;
+  }
+  return mesh;
+}
+fem::mesh::Mesh fem::mesh::operator+(const Mesh& lhs, const double& rhs) {
+  Mesh mesh = lhs;
+  for (auto& it : mesh.points) {
+    it[0] += rhs;
+    it[1] += rhs;
   }
   return mesh;
 }
@@ -106,4 +140,47 @@ void fem::mesh::SaveMesh(const std::string& file, Mesh mesh) {
     fprintf(out, "%lu %lu %lu\n", it[0], it[1], it[2]);
   }
   fclose(out);
+}
+
+fem::mesh::Mesh fem::mesh::LoadTriangleMesh(const std::string& name) {
+  Mesh mesh;
+  FILE* node = fopen((name + ".node").c_str(), "r");
+  if (!node) {
+    fprintf(stderr, "Failed to load \"%s\"\n", (name + ".node").c_str());
+    return mesh;
+  }
+  uint64_t n, d, a, b, i_bit;
+  fscanf(node, "%lu %lu %lu %lu", &n, &d, &a, &b);
+  for (; n > 0; --n) {
+    double x, y, d_bit;
+    fscanf(node, "%lu %lf %lf %lf %lu", &i_bit, &x, &y, &d_bit, &b);
+    mesh.points.push_back({{x, y}});
+  }
+  fclose(node);
+  FILE* ele = fopen((name + ".ele").c_str(), "r");
+  if (!ele) {
+    fprintf(stderr, "Failed to load \"%s\"\n", (name + ".ele").c_str());
+    return mesh;
+  }
+  fscanf(ele, "%lu %lu %lu", &n, &d, &a);
+  for (; n > 0; --n) {
+    uint64_t a, b, c;
+    fscanf(ele, "%lu %lu %lu %lu", &i_bit, &a, &b, &c);
+    mesh.triangles.push_back({{a - 1, b - 1, c - 1}});
+  }
+  fclose(ele);
+  return mesh;
+}
+
+
+fem::mesh::Mesh fem::mesh::Flip(Mesh mesh){
+  std::array<double, 2>range_y = {{INFINITY, -INFINITY}};
+  for(auto& pt : mesh.points){
+    range_y[0] = std::min(range_y[0], pt[1]);
+    range_y[1] = std::max(range_y[1], pt[1]);
+  }
+  for(auto& pt : mesh.points){
+    pt[1] = range_y[1] - (pt[1] - range_y[0]);
+  }
+  return mesh;
 }

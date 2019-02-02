@@ -27,9 +27,13 @@ namespace mesh {
    private:
   };
   Mesh operator*(const Mesh& lhs, const double& rhs);
+  Mesh operator+(const Mesh& lhs, const double& rhs);
 
   Mesh LoadMesh(const std::string& file);
   void SaveMesh(const std::string& file, Mesh mesh);
+  Mesh LoadTriangleMesh(const std::string& name);
+
+  Mesh Flip(Mesh mesh);
 }  // namespace mesh
 }  // namespace fem
 

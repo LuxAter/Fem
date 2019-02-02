@@ -137,6 +137,75 @@ void fem::image::Figure::Circle(
   }
 }
 
+#ifdef _REENTRANT
+std::pair<std::array<uint64_t, 2>, double> CalcVal(
+    const std::function<double(double, double)>& func,
+    const fem::mesh::Mesh& mesh, const double& vmin, const double& vmax,
+    std::array<double, 2> pt, std::array<uint64_t, 2> id) {
+  if (mesh.InMesh(pt)) {
+    double val = func(pt[0], pt[1]);
+    if (val > vmax) {
+      val = vmax;
+    }
+    if (val < vmin) {
+      val = vmin;
+    }
+    return std::make_pair(id, val);
+  }
+  return std::make_pair(id, std::numeric_limits<double>::quiet_NaN());
+}
+void fem::image::Figure::Mesh(const std::function<double(double, double)>& func,
+                              const fem::mesh::Mesh& mesh, double vmin,
+                              double vmax) {
+  std::array<double, 2> bounds_x{{INFINITY, -INFINITY}};
+  std::array<double, 2> bounds_y{{INFINITY, -INFINITY}};
+  for (auto& pt : mesh.points) {
+    bounds_x[0] = std::min(bounds_x[0], pt[0]);
+    bounds_y[0] = std::min(bounds_y[0], pt[1]);
+    bounds_x[1] = std::max(bounds_x[1], pt[0]);
+    bounds_y[1] = std::max(bounds_y[1], pt[1]);
+  }
+  double step_size_x = ((bounds_x[1] - bounds_x[0]) / width_),
+         step_size_y = ((bounds_y[1] - bounds_y[0]) / height_);
+  data_.clear();
+  data_ = std::vector<std::vector<double>>(
+      (bounds_y[1] - bounds_y[0]) / step_size_y,
+      std::vector<double>((bounds_x[1] - bounds_x[0]) / step_size_x, 0.0));
+  std::vector<std::future<std::pair<std::array<uint64_t, 2>, double>>> pixels;
+  uint64_t iy = 0;
+  for (double i = bounds_y[0]; i <= bounds_y[1]; i += step_size_y) {
+    uint64_t ix = 0;
+    for (double j = bounds_x[0]; j <= bounds_x[1]; j += step_size_x) {
+      pixels.push_back(std::async(std::launch::async, CalcVal, std::ref(func),
+                                  std::ref(mesh), std::ref(vmin),
+                                  std::ref(vmax), std::array<double, 2>{{i, j}},
+                                  std::array<uint64_t, 2>{{iy, ix}}));
+      if (pixels.size() >= 1000) {
+        for (auto& th : pixels) {
+          std::pair<std::array<uint64_t, 2>, double> pt = th.get();
+          if (!std::isnan(pt.second)) {
+            bounds_[0] = std::min(pt.second, bounds_[0]);
+            bounds_[1] = std::max(pt.second, bounds_[1]);
+          }
+          data_[pt.first[0]][pt.first[1]] = pt.second;
+        }
+        pixels.clear();
+      }
+      ++ix;
+    }
+    ++iy;
+  }
+  bounds_ = {{INFINITY, -INFINITY}};
+  for (auto& th : pixels) {
+    std::pair<std::array<uint64_t, 2>, double> pt = th.get();
+    if (!std::isnan(pt.second)) {
+      bounds_[0] = std::min(pt.second, bounds_[0]);
+      bounds_[1] = std::max(pt.second, bounds_[1]);
+    }
+    data_[pt.first[0]][pt.first[1]] = pt.second;
+  }
+}
+#else
 void fem::image::Figure::Mesh(const std::function<double(double, double)>& func,
                               const fem::mesh::Mesh& mesh, double vmin,
                               double vmax) {
@@ -166,6 +235,7 @@ void fem::image::Figure::Mesh(const std::function<double(double, double)>& func,
         bounds_[0] = std::min(z_val, bounds_[0]);
         bounds_[1] = std::max(z_val, bounds_[1]);
         row.push_back(z_val);
+        std::cout << z_val << ",";
       } else {
         row.push_back(std::numeric_limits<double>::quiet_NaN());
       }
@@ -173,6 +243,7 @@ void fem::image::Figure::Mesh(const std::function<double(double, double)>& func,
     data_.push_back(row);
   }
 }
+#endif
 
 void fem::image::Figure::OverlayCircle(int cx, int cy, int r, uint32_t color) {
   int rsq = r * r;
@@ -278,10 +349,12 @@ void fem::image::Figure::OverlayMesh(fem::mesh::Mesh& mesh, uint8_t size,
     for (uint8_t i = 0; i < 3; ++i) {
       uint8_t j = (i + 1) % 3;
       std::array<double, 2> v1 = mesh.points[tri[i]], v2 = mesh.points[tri[j]];
-      int64_t x0 = width_/(bounds_x[1] - bounds_x[0]) * (v1[0] - bounds_x[0]);
-      int64_t y0 = height_/(bounds_y[1] - bounds_y[0]) * (v1[1] - bounds_y[0]);
-      int64_t x1 = width_/(bounds_x[1] - bounds_x[0]) * (v2[0] - bounds_x[0]);
-      int64_t y1 = height_/(bounds_y[1] - bounds_y[0]) * (v2[1] - bounds_y[0]);
+      int64_t x0 = width_ / (bounds_x[1] - bounds_x[0]) * (v1[0] - bounds_x[0]);
+      int64_t y0 =
+          height_ / (bounds_y[1] - bounds_y[0]) * (v1[1] - bounds_y[0]);
+      int64_t x1 = width_ / (bounds_x[1] - bounds_x[0]) * (v2[0] - bounds_x[0]);
+      int64_t y1 =
+          height_ / (bounds_y[1] - bounds_y[0]) * (v2[1] - bounds_y[0]);
       OverlayLine(x0, y0, x1, y1, size, color);
     }
   }
@@ -320,6 +393,8 @@ std::vector<std::array<double, 3>> fem::image::Figure::LoadCmap(
     return fem::image::_cmap::inferno;
   } else if (cmap == "plasma") {
     return fem::image::_cmap::plasma;
+  } else if (cmap == "grey") {
+    return fem::image::_cmap::grey;
   } else {
     return fem::image::_cmap::viridis;
   }

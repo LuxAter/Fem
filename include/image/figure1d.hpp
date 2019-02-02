@@ -14,9 +14,11 @@
 
 namespace fem {
 namespace image {
-  inline std::string GenFileName(std::string base_name, std::string ext, uint64_t i){
+  inline std::string GenFileName(std::string base_name, std::string ext,
+                                 uint64_t i) {
     char buff[255];
-    snprintf(buff, 255, "%s/%07lu%s.%s", base_name.c_str(), i, base_name.c_str(), ext.c_str());
+    snprintf(buff, 255, "%s/%07lu%s.%s", base_name.c_str(), i,
+             base_name.c_str(), ext.c_str());
     return std::string(buff);
   }
   class Figure1D {
@@ -30,8 +32,8 @@ namespace image {
     template <typename _T, std::size_t _N>
     void Line(std::array<_T, _N> x, std::array<_T, _N> y,
               std::string color = "", std::string vertex_color = "",
-              std::string vertex_fill = "", uint32_t stroke = 1, uint32_t dash=0,
-              uint32_t vertex_r = 0) {
+              std::string vertex_fill = "", uint32_t stroke = 1,
+              uint32_t dash = 0, uint32_t vertex_r = 0) {
       std::tuple<std::vector<std::array<double, 2>>, std::string, std::string,
                  std::string, double, double, double>
           local_plot;
@@ -44,7 +46,6 @@ namespace image {
       for (std::size_t i = 0; i < _N; ++i) {
         double dx = static_cast<double>(x[i]);
         double dy = static_cast<double>(y[i]);
-        // std::cout << x[i] << "->" << dx << "<<<\n";
         bounds_[0] = std::min(bounds_[0], dx);
         bounds_[1] = std::min(bounds_[1], dy);
         bounds_[2] = std::max(bounds_[2], dx);
@@ -93,15 +94,21 @@ namespace image {
     void SaveSvg(const std::string& file);
     void SavePgf(const std::string& file);
 
+    void Clear() {
+      scatter_.clear();
+      line_.clear();
+      bounds_ = {{INFINITY, INFINITY, -INFINITY, -INFINITY}};
+    }
+
    private:
     void PlotScatter(
         Svg& svg,
         const std::tuple<std::vector<std::array<double, 2>>, std::string,
                          std::string, double, double>& scatter);
-    void PlotLine(
-        Svg& svg,
-        const std::tuple<std::vector<std::array<double, 2>>, std::string,
-                         std::string, std::string, double, double, double>& line);
+    void PlotLine(Svg& svg,
+                  const std::tuple<std::vector<std::array<double, 2>>,
+                                   std::string, std::string, std::string,
+                                   double, double, double>& line);
 
     uint64_t width_, height_;
     uint8_t color_;
