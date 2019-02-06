@@ -6,8 +6,12 @@ using namespace fem;
 
 int main(int argc, char *argv[])
 {
-  Vec a(25, 7.0);
-  a.fill(rand);
-  std::cout << a.dump() << '\n';
+  Mat b(10, 1);
+  b.set(3, 7, 3.1);
+  std::cout << b.count() << '\n';
+  std::cout << b.dump() << '\n';
+  b.set(3,7,0);
+  std::cout << b.count() << '\n';
+  std::cout << b.dump() << '\n';
   return 0;
 }
