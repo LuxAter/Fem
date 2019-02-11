@@ -7,13 +7,13 @@
 
 namespace fem {
   struct PSLG{
-    std::vector<Pt> points_;
-    std::vector<Edge> edges_;
-    std::vector<Pt> holes_;
+    std::vector<Pt> points;
+    std::vector<Edge> edges;
+    std::vector<Pt> holes;
   };
 
-  void SaveToFile(const std::string_view& file_name, const PSLG& pslg);
-  PSLG LoadFromFile(const std::string_view& file_name);
+  void SaveToFile(const std::string& file_name, const PSLG& pslg);
+  PSLG LoadPslgFromFile(const std::string& file_name);
 } // namespace fem
 
 #endif  // FEM_MESH_PSLG_HPP_

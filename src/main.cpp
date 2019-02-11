@@ -43,5 +43,8 @@ int main(int argc, char* argv[]) {
   // Vec c = LoadVecFromFile("c.vec");
   // Vec d = fem::LinAlgSolve(A, c);
   // std::cout << 100.0 * (Norm(d) - Norm(b))/Norm(b) << "\n";
+
+  PSLG pslg = LoadPslgFromFile("pslg/circles.pslg");
+  image::WriteTikz("test.tikz", pslg);
   return 0;
 }
