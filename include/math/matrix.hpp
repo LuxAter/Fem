@@ -1,11 +1,13 @@
 #ifndef FEM_MATH_MATRIX_HPP_
 #define FEM_MATH_MATRIX_HPP_
 
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
 
 #include "vector.hpp"
+#include "../util/to_string.hpp"
 
 namespace fem {
 template <typename _T>
@@ -46,37 +48,44 @@ class Matrix {
     return values_[row_ptr_[r] + i];
   }
 
-  std::string dump() const {
+  std::string dump(unsigned perc = 5) const {
     std::string dmp;
     for (unsigned long i = 0; i < size_; ++i) {
       for (unsigned long j = 0; j < size_; ++j) {
-        dmp += std::to_string(at(i, j)) + " ";
+        dmp += fem::to_string(at(i, j), perc) + " ";
       }
       dmp += "\n";
     }
     return dmp;
   }
 
+  inline void resize(const unsigned long& size) {
+    size_ = size;
+    row_ptr_ = std::vector<unsigned long>(size_ + 1, 0);
+    col_ind_.clear();
+    values_.clear();
+  }
+
   template <typename _U>
-    inline Matrix<_T>& operator+=(const _U& rhs) {
-      *this = *this + rhs;
-      return *this;
-    }
-    template <typename _U>
-    inline Matrix<_T>& operator-=(const _U& rhs) {
-      *this = *this - rhs;
-      return *this;
-    }
-    template <typename _U>
-    inline Matrix<_T>& operator*=(const _U& rhs) {
-      *this = *this * rhs;
-      return *this;
-    }
-    template <typename _U>
-    inline Matrix<_T>& operator/=(const _U& rhs) {
-      *this = *this / rhs;
-      return *this;
-    }
+  inline Matrix<_T>& operator+=(const _U& rhs) {
+    *this = *this + rhs;
+    return *this;
+  }
+  template <typename _U>
+  inline Matrix<_T>& operator-=(const _U& rhs) {
+    *this = *this - rhs;
+    return *this;
+  }
+  template <typename _U>
+  inline Matrix<_T>& operator*=(const _U& rhs) {
+    *this = *this * rhs;
+    return *this;
+  }
+  template <typename _U>
+  inline Matrix<_T>& operator/=(const _U& rhs) {
+    *this = *this / rhs;
+    return *this;
+  }
 
   _T& operator()(unsigned long r, unsigned long c) {
     if (row_ptr_[r + 1] - row_ptr_[r] == 0) {
@@ -168,10 +177,13 @@ class Matrix {
   }
 
   std::vector<unsigned long> row_ptr() const { return row_ptr_; }
+  std::vector<unsigned long>* row_ptr_pt() { return &row_ptr_; }
   unsigned long row_ptr(const unsigned long& i) const { return row_ptr_[i]; }
   std::vector<unsigned long> col_ind() const { return col_ind_; }
+  std::vector<unsigned long>* col_ind_pt() { return &col_ind_; }
   unsigned long col_ind(const unsigned long& i) const { return col_ind_[i]; }
   std::vector<_T> data() const { return values_; }
+  std::vector<_T>* data_pt() { return &values_; }
   _T data(const unsigned long& i) const { return values_[i]; }
 
  private:
@@ -294,6 +306,50 @@ Matrix<_T> Transpose(const Matrix<_T>& mat) {
         res.set(mat.col_ind(i), r, mat.data(i));
       }
     }
+  }
+  return res;
+}
+
+template <typename _T>
+void SaveToFile(const std::string& file_name, const Matrix<_T>& mat) {
+  std::ofstream out(file_name.c_str());
+  if (out.is_open()) {
+    out << mat.size() << '\n';
+    for (std::size_t i = 0; i < mat.size(); ++i) {
+      out << mat.row_ptr(i + 1) << ' ';
+      for (std::size_t j = mat.row_ptr(i); j < mat.row_ptr(i + 1); ++j) {
+        out << mat.col_ind(j) << ' ' << fem::to_string(mat.data(j)) << ' ';
+      }
+      out << '\n';
+    }
+    out.close();
+  }
+}
+
+template <typename _T = double>
+Matrix<_T> LoadMatFromFile(const std::string& file_name) {
+  Matrix<_T> res;
+  std::ifstream src(file_name.c_str());
+  if (src.is_open()) {
+    unsigned long size;
+    src >> size;
+    res.resize(size);
+    std::vector<unsigned long>* row_ptr = res.row_ptr_pt();
+    std::vector<unsigned long>* col_ind = res.col_ind_pt();
+    std::vector<_T>* data = res.data_pt();
+    for (unsigned long i = 0; i < size; ++i) {
+      unsigned long row_ind;
+      src >> row_ind;
+      row_ptr->at(i + 1) = row_ind;
+      for (unsigned long j = row_ptr->at(i); j < row_ind; ++j) {
+        unsigned long local_col_ind;
+        _T val;
+        src >> local_col_ind >> val;
+        col_ind->push_back(local_col_ind);
+        data->push_back(val);
+      }
+    }
+    src.close();
   }
   return res;
 }

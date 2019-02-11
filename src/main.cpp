@@ -29,10 +29,19 @@ fem::Mat RandMat(unsigned long size, double spar) {
 
 int main(int argc, char* argv[]) {
   srand(time(NULL));
-  Mat A = RandMat(1000, 0.5);
-  Vec b(1000, frand);
-  Vec c = A * b;
-  Vec d = fem::LinAlgSolve(A, c);
-  std::cout << 100.0 * (Norm(d) - Norm(b))/Norm(b) << "\n";
+  // Mat A = RandMat(1000, 0.5);
+  // Vec b(1000, frand);
+  // Vec c = A * b;
+  // Vec d = fem::LinAlgSolve(A, c);
+  // SaveToFile("A.mat", A);
+  // SaveToFile("b.vec", b);
+  // SaveToFile("c.vec", c);
+
+
+  // Mat A = LoadMatFromFile("A.mat");
+  // Vec b = LoadVecFromFile("b.vec");
+  // Vec c = LoadVecFromFile("c.vec");
+  // Vec d = fem::LinAlgSolve(A, c);
+  // std::cout << 100.0 * (Norm(d) - Norm(b))/Norm(b) << "\n";
   return 0;
 }

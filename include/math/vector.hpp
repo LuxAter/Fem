@@ -4,10 +4,13 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <fstream>
 #include <functional>
 #include <initializer_list>
 #include <iostream>
 #include <string>
+
+#include "../util/to_string.hpp"
 
 namespace fem {
 template <typename _T>
@@ -68,12 +71,19 @@ class Vector {
   inline void set(const unsigned long& i, const _T& v) { data_[i] = v; }
 
   inline unsigned long size() const noexcept { return size_; }
-  std::string dump() const {
+  std::string dump(unsigned perc = 5) const {
     std::string dmp;
     for (unsigned long i = 0; i < size_; ++i) {
-      dmp += std::to_string(data_[i]) + ' ';
+      dmp += fem::to_string(data_[i], perc) + ' ';
     }
     return dmp;
+  }
+
+  inline void resize(const unsigned long& size) {
+    free(data_);
+    size_ = size;
+    data_ = (_T*)std::malloc(size_ * sizeof(_T));
+    std::fill(data_, data_ + size_, _T());
   }
 
   template <typename _U>
@@ -264,9 +274,31 @@ _T Norm(const Vector<_T>& lhs) {
   return std::sqrt(val);
 }
 
-template <typename _T=double>
-Vector<_T> LoadFromFile(const std::string_view& file_name){
+template <typename _T = double>
+void SaveToFile(const std::string& file_name, const Vector<_T>& vec) {
+  std::ofstream out(file_name.c_str());
+  if (out.is_open()) {
+    out << vec.size() << '\n' << vec.dump(16);
+    out.close();
+  }
+}
 
+template <typename _T = double>
+Vector<_T> LoadVecFromFile(const std::string& file_name) {
+  Vector<_T> res;
+  std::ifstream src(file_name.c_str());
+  if (src.is_open()) {
+    unsigned long size;
+    src >> size;
+    res.resize(size);
+    for (unsigned long i = 0; i < size; ++i) {
+      _T val;
+      src >> val;
+      res[i] = val;
+    }
+    src.close();
+  }
+  return res;
 }
 
 typedef Vector<double> Vec;
