@@ -8,7 +8,7 @@
   "LINK": "",
   "source": "src",
   "include_dir": "include",
-  "include": [],
+  "include": ["-I$(ROOT)/$(BUILD)/libpng/include"],
   "build": "build",
   "fem": {
     "path": "fem",
@@ -21,6 +21,13 @@
     "path": "$(BUILD)/libfem.a",
     "files_exclude": "src/main.cpp",
     "files": "src/*.cpp",
+    "dep": ["libpng.a"],
+    "join": true,
     "type": "lib"
+  },
+  "libpng.a": {
+    "path": "$(ROOT)/{{build}}/libpng.a",
+    "source": "libpng",
+    "type": "aumake"
   }
 }
