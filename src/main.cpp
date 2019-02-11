@@ -46,5 +46,7 @@ int main(int argc, char* argv[]) {
 
   PSLG pslg = LoadPslgFromFile("pslg/circles.pslg");
   image::WriteTikz("test.tikz", pslg);
+  image::WritePng("test.png", 500, 500, pslg);
+  image::WriteSvg("test.svg", 500, 500, pslg);
   return 0;
 }

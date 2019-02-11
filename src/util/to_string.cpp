@@ -18,3 +18,13 @@ std::string fem::to_string(const long double& val, unsigned perc){
   snprintf(buff, 255, "%.*Lf", perc, val);
   return std::string(buff);
 }
+std::string fem::to_hex(const unsigned& val){
+  char buff[256];
+  snprintf(buff, 255, "#%06x", val);
+  return std::string(buff);
+}
+std::string fem::to_hex(const unsigned long& val){
+  char buff[256];
+  snprintf(buff, 255, "#%06lx", val);
+  return std::string(buff);
+}
