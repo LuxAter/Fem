@@ -2,6 +2,7 @@
 #define FEM_MATH_VECTOR_HPP_
 
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <functional>
 #include <initializer_list>
@@ -16,6 +17,20 @@ class Vector {
   explicit Vector(const unsigned long& n) : size_(n) {
     data_ = (_T*)std::malloc(size_ * sizeof(_T));
     std::fill(data_, data_ + size_, _T());
+  }
+  template <typename _U>
+  Vector(const unsigned long& n, _U (*func)()) : size_(n) {
+    data_ = (_T*)std::malloc(size_ * sizeof(_T));
+    for (unsigned long i = 0; i < n; ++i) {
+      data_[i] = static_cast<_T>(func());
+    }
+  }
+  template <typename _U>
+  Vector(const unsigned long& n, _U (*func)(const unsigned long&)) : size_(n) {
+    data_ = (_T*)std::malloc(size_ * sizeof(_T));
+    for (unsigned long i = 0; i < n; ++i) {
+      data_[i] = static_cast<_T>(func(i));
+    }
   }
   explicit Vector(const unsigned long& n, const _T& v) : size_(n) {
     data_ = (_T*)std::malloc(size_ * sizeof(_T));
@@ -36,16 +51,21 @@ class Vector {
     size_ = args.size();
     data_ = (_T*)std::malloc(size_ * sizeof(_T));
     std::copy(args.begin(), args.end(), data_);
+    return *this;
   }
   Vector<_T>& operator=(const Vector<_T>& copy) {
     free(data_);
     size_ = copy.size();
     data_ = (_T*)std::malloc(size_ * sizeof(_T));
     std::copy(copy.begin(), copy.end(), data_);
+    return *this;
   }
 
   inline _T& operator[](const unsigned long& i) { return data_[i]; }
   inline const _T& operator[](const unsigned long& i) const { return data_[i]; }
+
+  inline _T at(const unsigned long& i) const { return data_[i]; }
+  inline void set(const unsigned long& i, const _T& v) { data_[i] = v; }
 
   inline unsigned long size() const noexcept { return size_; }
   std::string dump() const {
@@ -224,6 +244,29 @@ inline Vector<_T> operator/(const Vector<_T>& lhs, const _U& rhs) {
     res[i] /= rhs;
   }
   return res;
+}
+
+template <typename _T, typename _U>
+_T Dot(const Vector<_T>& lhs, const Vector<_U>& rhs) {
+  _T val = _T();
+  for (unsigned long i = 0; i < lhs.size() && i < rhs.size(); ++i) {
+    val += (lhs.at(i) * rhs.at(i));
+  }
+  return val;
+}
+
+template <typename _T>
+_T Norm(const Vector<_T>& lhs) {
+  _T val = _T();
+  for (unsigned long i = 0; i < lhs.size(); ++i) {
+    val += (lhs.at(i) * lhs.at(i));
+  }
+  return std::sqrt(val);
+}
+
+template <typename _T=double>
+Vector<_T> LoadFromFile(const std::string_view& file_name){
+
 }
 
 typedef Vector<double> Vec;

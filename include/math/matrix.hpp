@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "vector.hpp"
+
 namespace fem {
 template <typename _T>
 class Matrix {
@@ -54,6 +56,27 @@ class Matrix {
     }
     return dmp;
   }
+
+  template <typename _U>
+    inline Matrix<_T>& operator+=(const _U& rhs) {
+      *this = *this + rhs;
+      return *this;
+    }
+    template <typename _U>
+    inline Matrix<_T>& operator-=(const _U& rhs) {
+      *this = *this - rhs;
+      return *this;
+    }
+    template <typename _U>
+    inline Matrix<_T>& operator*=(const _U& rhs) {
+      *this = *this * rhs;
+      return *this;
+    }
+    template <typename _U>
+    inline Matrix<_T>& operator/=(const _U& rhs) {
+      *this = *this / rhs;
+      return *this;
+    }
 
   _T& operator()(unsigned long r, unsigned long c) {
     if (row_ptr_[r + 1] - row_ptr_[r] == 0) {
@@ -203,12 +226,36 @@ inline Matrix<_T> operator-(const Matrix<_T>& lhs, const Matrix<_U>& rhs) {
 template <typename _T, typename _U>
 inline Matrix<_T> operator*(const Matrix<_T>& lhs, const Matrix<_U>& rhs) {
   Matrix<_T> res(std::min(lhs.size(), rhs.size()));
-  for (unsigned int r = 0; r < res.size(); ++r) {
-    if (lhs.row_count(r) != 0 || rhs.row_count(r) != 0) {
-      for (unsigned int c = 0; c < res.size(); ++c) {
-        res.set(r, c, lhs.at(r, c) * rhs.at(r, c));
+  for (unsigned long r = 0; r < res.size(); ++r) {
+    for (unsigned long c = 0; c < res.size(); ++c) {
+      _T sum = _T();
+      for (unsigned long k = 0; k < res.size(); ++k) {
+        sum += (lhs.at(r, k) * rhs.at(k, c));
       }
+      res.set(r, c, sum);
     }
+  }
+  return res;
+}
+template <typename _T, typename _U>
+inline Matrix<_T> operator*(const Matrix<_T>& lhs, const _U& rhs) {
+  Matrix<_T> res(lhs);
+  for (unsigned long r = 0; r < res.size(); ++r) {
+    for (unsigned long c = 0; c < res.size(); ++c) {
+      res.set(r, c, res.at(r, c) * rhs);
+    }
+  }
+  return res;
+}
+template <typename _T, typename _U>
+inline Vector<_T> operator*(const Matrix<_T>& lhs, const Vector<_U>& rhs) {
+  Vector<_T> res(lhs.size());
+  for (unsigned long r = 0; r < lhs.size(); ++r) {
+    _T sum = _T();
+    for (unsigned long c = 0; c < rhs.size() && c < lhs.size(); ++c) {
+      sum += (lhs.at(r, c) * rhs.at(c));
+    }
+    res.set(r, sum);
   }
   return res;
 }
@@ -228,13 +275,11 @@ inline Matrix<_T> operator/(const Matrix<_T>& lhs, const Matrix<_U>& rhs) {
 template <typename _T, typename _U>
 Matrix<_T> Multiply(const Matrix<_T>& lhs, const Matrix<_U>& rhs) {
   Matrix<_T> res(std::min(lhs.size(), rhs.size()));
-  for (unsigned long r = 0; r < res.size(); ++r) {
-    for (unsigned long c = 0; c < res.size(); ++c) {
-      _T sum = _T();
-      for (unsigned long k = 0; k < res.size(); ++k) {
-        sum += (lhs.at(r, k) * rhs.at(k, c));
+  for (unsigned int r = 0; r < res.size(); ++r) {
+    if (lhs.row_count(r) != 0 || rhs.row_count(r) != 0) {
+      for (unsigned int c = 0; c < res.size(); ++c) {
+        res.set(r, c, lhs.at(r, c) * rhs.at(r, c));
       }
-      res.set(r, c, sum);
     }
   }
   return res;

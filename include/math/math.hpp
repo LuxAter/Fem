@@ -3,5 +3,6 @@
 
 #include "vector.hpp"
 #include "matrix.hpp"
+#include "linalg.hpp"
 
 #endif  // FEM_MATH_MATH_HPP_
