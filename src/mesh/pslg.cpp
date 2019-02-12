@@ -1,10 +1,59 @@
 #include "mesh/pslg.hpp"
 
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
 
 #include "util/util.hpp"
+
+fem::PSLG fem::Normalize(const PSLG& pslg, double min_v, double max_v) {
+  double x_min = INFINITY, x_max = -INFINITY, y_min = INFINITY,
+         y_max = INFINITY;
+  PSLG res;
+  for (auto& pt : pslg.points) {
+    x_min = std::min(x_min, pt.x);
+    x_max = std::max(x_max, pt.x);
+    y_min = std::min(y_min, pt.y);
+    y_max = std::max(y_max, pt.y);
+  }
+  for (auto& pt : pslg.holes) {
+    x_min = std::min(x_min, pt.x);
+    x_max = std::max(x_max, pt.x);
+    y_min = std::min(y_min, pt.y);
+    y_max = std::max(y_max, pt.y);
+  }
+  double dmax = std::max(x_max - x_min, y_max - y_min) / (max_v - min_v);
+  for (auto& pt : pslg.points) {
+    res.points.push_back(
+        {(pt.x - x_min + min_v) / dmax, (pt.y - y_min + min_v) / dmax});
+  }
+  for (auto& pt : pslg.holes) {
+    res.holes.push_back(
+        {(pt.x - x_min + min_v) / dmax, (pt.y - y_min + min_v) / dmax});
+  }
+  res.edges = pslg.edges;
+  res._x_min = x_min;
+  res._y_min = y_min;
+  res._x_max = x_max;
+  res._y_max = y_max;
+  res._dmax = dmax;
+  return res;
+}
+
+fem::PSLG fem::UnNormalize(const PSLG& pslg, double min_v, double max_v) {
+  PSLG res;
+  for (auto& pt : pslg.points) {
+    res.points.push_back({pt.x * pslg._dmax + pslg._x_min - min_v,
+                          pt.y * pslg._dmax + pslg._y_min - min_v});
+  }
+  for (auto& pt : pslg.holes) {
+    res.holes.push_back({pt.x * pslg._dmax + pslg._x_min - min_v,
+                         pt.y * pslg._dmax + pslg._y_min - min_v});
+  }
+  res.edges = pslg.edges;
+  return res;
+}
 
 void fem::SaveToFile(const std::string& file_name, const PSLG& pslg) {
   FILE* out = std::fopen(file_name.c_str(), "w");
