@@ -8,10 +8,35 @@
 #include "util/util.hpp"
 
 fem::Mesh fem::DelTri(PSLG pslg) {
-  pslg = Normalize(pslg);
+  double x_min = INFINITY, x_max = -INFINITY, y_min = INFINITY,
+         y_max = INFINITY;
+  for (auto& pt : pslg.points) {
+    x_min = std::min(x_min, pt.x);
+    x_max = std::max(x_max, pt.x);
+    y_min = std::min(y_min, pt.y);
+    y_max = std::max(y_max, pt.y);
+  }
+  for (auto& pt : pslg.holes) {
+    x_min = std::min(x_min, pt.x);
+    x_max = std::max(x_max, pt.x);
+    y_min = std::min(y_min, pt.y);
+    y_max = std::max(y_max, pt.y);
+  }
+  double dmax = std::max(x_max - x_min, y_max - y_min);
+  for (auto& pt : pslg.points) {
+    pslg.points.push_back({(pt.x - x_min) / dmax, (pt.y - y_min) / dmax});
+  }
+  for (auto& pt : pslg.holes) {
+    pslg.holes.push_back({(pt.x - x_min) / dmax, (pt.y - y_min) / dmax});
+  }
   // pslg.points = BSort(pslg.points);
   // pslg = UnNormalize(pslg);
-  return Delaun(pslg);
+  Mesh mesh = Delaun(pslg);
+  for (auto& pt : mesh.pts) {
+    pt.x = pt.x * dmax + x_min;
+    pt.y = pt.y * dmax + y_min;
+  }
+  return mesh;
 }
 
 std::vector<fem::Pt> fem::BSort(const std::vector<Pt>& points) {

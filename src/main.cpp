@@ -3,6 +3,8 @@
 #include <iostream>
 #include <random>
 
+#include "lua/script.hpp"
+
 using namespace fem;
 
 double frand(){
@@ -44,9 +46,19 @@ int main(int argc, char* argv[]) {
   // Vec d = fem::LinAlgSolve(A, c);
   // std::cout << 100.0 * (Norm(d) - Norm(b))/Norm(b) << "\n";
 
-  PSLG pslg = LoadPslgFromFile("pslg/circles.pslg");
-  image::WriteTikz("test.tikz", pslg);
-  image::WritePng("test.png", 500, 500, pslg);
-  image::WriteSvg("test.svg", 500, 500, pslg);
+  // PSLG pslg = LoadPslgFromFile("pslg/circles.pslg");
+  // Mesh mesh = Delaun(pslg);
+  // image::WriteSvg("test.svg", 500, 500, mesh);
+  
+  Mesh mesh = LoadMesh("mesh/trial.mesh");
+  image::WriteSvg("test.svg", 500, 500, mesh);
+  
+  // lua::OpenScript("test.lua");
+  // std::cout << lua::Call(0.4, 0.3) << "\n";
+  // lua::CloseScript();
+
+  // image::WriteTikz("test.tikz", pslg);
+  // image::WritePng("test.png", 500, 500, pslg);
+  // image::WriteSvg("test.svg", 500, 500, pslg);
   return 0;
 }

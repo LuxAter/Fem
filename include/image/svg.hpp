@@ -4,6 +4,7 @@
 #include <string>
 
 #include "../mesh/pslg.hpp"
+#include "../mesh/mesh.hpp"
 
 namespace fem {
 namespace image {
@@ -15,6 +16,8 @@ namespace image {
   void SvgDrawCircle(int cx, int cy, unsigned r, uint32_t c, int w = -1);
   bool WriteSvg(const std::string& file_name, const unsigned& w,
                 const unsigned& h, const PSLG& pslg);
+  bool WriteSvg(const std::string& file_name, const unsigned& w,
+                const unsigned& h, const Mesh& pslg);
 }  // namespace image
 }  // namespace fem
 

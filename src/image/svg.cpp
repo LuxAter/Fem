@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "mesh/mesh.hpp"
 #include "mesh/pslg.hpp"
 #include "util/to_string.hpp"
 
@@ -64,7 +65,7 @@ void fem::image::SvgDrawCircle(int cx, int cy, unsigned r, uint32_t c, int w) {
   }
 }
 bool fem::image::WriteSvg(const std::string& file_name, const unsigned& w,
-    const unsigned& h, const PSLG& pslg) {
+                          const unsigned& h, const PSLG& pslg) {
   SvgInitalizeData(w, h);
   std::vector<Pt> scaled_points = pslg.points;
   std::vector<Pt> scaled_holes = pslg.holes;
@@ -75,13 +76,38 @@ bool fem::image::WriteSvg(const std::string& file_name, const unsigned& w,
     pt.y = (pt.y * (y * 0.98)) + y;
     SvgDrawCircle(pt.x, pt.y, 2, 0);
   }
-  for(auto& edg : pslg.edges){
-    SvgDrawLine(scaled_points[edg.x].x, scaled_points[edg.x].y, scaled_points[edg.y].x, scaled_points[edg.y].y, 0);
+  for (auto& edg : pslg.edges) {
+    SvgDrawLine(scaled_points[edg.x].x, scaled_points[edg.x].y,
+                scaled_points[edg.y].x, scaled_points[edg.y].y, 0);
   }
   for (auto& pt : scaled_holes) {
     pt.x = (pt.x * x) + x;
     pt.y = (pt.y * y) + y;
     SvgDrawCircle(pt.x, pt.y, 2, 0xff0000);
+  }
+  bool res = SvgWriteData(file_name);
+  SvgFreeData();
+  return res;
+}
+
+bool fem::image::WriteSvg(const std::string& file_name, const unsigned& w,
+                          const unsigned& h, const Mesh& pslg) {
+  SvgInitalizeData(w, h);
+  std::vector<Pt> scaled_points = pslg.pts;
+  double x = w / 2.0;
+  double y = h / 2.0;
+  for (auto& pt : scaled_points) {
+    pt.x = (pt.x * (x * 0.98)) + x;
+    pt.y = (pt.y * (y * 0.98)) + y;
+    SvgDrawCircle(pt.x, pt.y, 2, 0);
+  }
+  for (auto& edg : pslg.tri) {
+    SvgDrawLine(scaled_points[edg.x].x, scaled_points[edg.x].y,
+                scaled_points[edg.y].x, scaled_points[edg.y].y, 0);
+    SvgDrawLine(scaled_points[edg.y].x, scaled_points[edg.y].y,
+                scaled_points[edg.z].x, scaled_points[edg.z].y, 0);
+    SvgDrawLine(scaled_points[edg.z].x, scaled_points[edg.z].y,
+                scaled_points[edg.x].x, scaled_points[edg.x].y, 0);
   }
   bool res = SvgWriteData(file_name);
   SvgFreeData();

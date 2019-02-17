@@ -10,10 +10,10 @@ CCIGNORE=
 CXXIGNORE=
 CCFLAGS=-fPIC -Wall -Wpedantic --static
 CXXFLAGS=-std=c++17 -fPIC -Wall -Wpedantic --static -O3
-LINK=-lz
+LINK=-lz -llua5.3
 SOURCE=src
 INCLUDE_DIR=include
-INCLUDE=-I$(ROOT)/$(BUILD)/libpng/include
+INCLUDE=-I$(ROOT)/$(BUILD)/libpng/include -I/usr/include/lua5.3/
 BUILD=build
 COMMON_INCLUDE=-I$(ROOT)/$(INCLUDE_DIR) $(INCLUDE)
 
