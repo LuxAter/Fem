@@ -15,6 +15,8 @@ struct Mesh {
   std::map<std::size_t, std::vector<double>> bc;
 };
 
+unsigned long TriLoc(const Pt& pt, const Mesh& mesh);
+
 Mesh LoadMesh(const std::string& file_name);
 }  // namespace fem
 

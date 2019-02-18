@@ -8,6 +8,27 @@
 #include <string>
 #include <vector>
 
+unsigned long fem::TriLoc(const Pt& p, const Mesh& mesh) {
+  unsigned long t = mesh.tri.size() - 1;
+  bool searching = true;
+  while (searching == true) {
+    bool within = true;
+    for (unsigned long i = 0; i < 3; ++i) {
+      unsigned long v1 = mesh.tri[t][i];
+      unsigned long v2 = mesh.tri[t][(i + 1) % 3];
+      if ((mesh.pts[v1].y - p.y) * (mesh.pts[v2].x - p.x) >
+          (mesh.pts[v1].x - p.x) * (mesh.pts[v2].y - p.y)) {
+        t = mesh.adj[t][i];
+        within = false;
+      }
+    }
+    if (within == true) {
+      searching = false;
+    }
+  }
+  return t;
+}
+
 fem::Mesh fem::LoadMesh(const std::string& file_name) {
   FILE* src = std::fopen(file_name.c_str(), "r");
   unsigned num;
@@ -34,6 +55,15 @@ fem::Mesh fem::LoadMesh(const std::string& file_name) {
     unsigned a, b, c;
     std::fscanf(src, "%u %u %u", &a, &b, &c);
     mesh.tri.push_back({a, b, c});
+    mesh.adj.push_back({num, num, num});
+    for (unsigned j = 0; j < 3; ++j) {
+      unsigned tmp;
+      if (std::fscanf(src, "%u", &tmp) != 0) {
+        mesh.adj.back()[j] = tmp;
+      } else {
+        std::fscanf(src, "_");
+      }
+    }
   }
 
   std::fclose(src);

@@ -155,27 +155,6 @@ fem::Mesh fem::Delaun(const PSLG& pslg) {
   return mesh;
 }
 
-unsigned long fem::TriLoc(const Pt& p, const Mesh& mesh) {
-  unsigned long t = mesh.tri.size() - 1;
-  bool searching = true;
-  while (searching == true) {
-    bool within = true;
-    for (unsigned long i = 0; i < 3; ++i) {
-      unsigned long v1 = mesh.tri[t][i];
-      unsigned long v2 = mesh.tri[t][(i + 1) % 3];
-      if ((mesh.pts[v1].y - p.y) * (mesh.pts[v2].x - p.x) >
-          (mesh.pts[v1].x - p.x) * (mesh.pts[v2].y - p.y)) {
-        t = mesh.adj[t][i];
-        within = false;
-      }
-    }
-    if (within == true) {
-      searching = false;
-    }
-  }
-  return t;
-}
-
 unsigned long fem::Edg(const unsigned long& tri, const unsigned long& adj,
                        const Mesh& mesh) {
   for (unsigned long i = 0; i < 3; ++i) {
