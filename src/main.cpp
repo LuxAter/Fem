@@ -7,9 +7,7 @@
 
 using namespace fem;
 
-double frand(){
-  return (double)rand() / RAND_MAX;
-}
+double frand() { return (double)rand() / RAND_MAX; }
 
 fem::Mat RandMat(unsigned long size, double spar) {
   Mat mat(size, 1.0);
@@ -18,10 +16,10 @@ fem::Mat RandMat(unsigned long size, double spar) {
   std::uniform_real_distribution<double> dist(0.0, 1.0);
   for (unsigned long r = 0; r < size; ++r) {
     for (unsigned long c = r; c < size; ++c) {
-      if(dist(gen) <= spar){
+      if (dist(gen) <= spar) {
         double v = dist(gen);
-        mat.set(r,c,v);
-        mat.set(c,r,v);
+        mat.set(r, c, v);
+        mat.set(c, r, v);
       }
     }
   }
@@ -39,7 +37,6 @@ int main(int argc, char* argv[]) {
   // SaveToFile("b.vec", b);
   // SaveToFile("c.vec", c);
 
-
   // Mat A = LoadMatFromFile("A.mat");
   // Vec b = LoadVecFromFile("b.vec");
   // Vec c = LoadVecFromFile("c.vec");
@@ -49,10 +46,25 @@ int main(int argc, char* argv[]) {
   // PSLG pslg = LoadPslgFromFile("pslg/circles.pslg");
   // Mesh mesh = Delaun(pslg);
   // image::WriteSvg("test.svg", 500, 500, mesh);
-  
+
   Mesh mesh = LoadMesh("mesh/trial.mesh");
-  image::WriteSvg("test.svg", 500, 500, mesh);
-  
+
+  double RES = 500.0;
+  for (int i = 0; i < 9; ++i) {
+    FILE* out = std::fopen(("matplotlib/" + std::to_string(i) + ".txt").c_str(), "w");
+    for (double y = -1.0; y < 1.0; y += (2.0 / RES)) {
+      for (double x = -1.0; x < 1.0; x += (2.0 / RES)) {
+        fprintf(out, "%f ",
+                GlobalBasis(mesh, i, {x, y}, fem::TriLoc({x, y}, mesh)));
+      }
+      fprintf(out, "\n");
+    }
+    std::fclose(out);
+  }
+
+  // image::WriteSvg("test.svg", 500, 500, mesh);
+  // image::WritePng("test.png", 500, 500, mesh);
+
   // lua::OpenScript("test.lua");
   // std::cout << lua::Call(0.4, 0.3) << "\n";
   // lua::CloseScript();

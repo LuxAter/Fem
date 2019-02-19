@@ -22,7 +22,7 @@ unsigned long fem::TriLoc(const Pt& p, const Mesh& mesh) {
         within = false;
       }
     }
-    if (within == true) {
+    if (within == true || t >= mesh.tri.size()) {
       searching = false;
     }
   }

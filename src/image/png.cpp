@@ -214,13 +214,67 @@ bool fem::image::WritePng(const std::string& file_name, const unsigned& w,
     pt.y = (pt.y * (y * 0.98)) + y;
     PngDrawCircle(pt.x, pt.y, 2, 0);
   }
-  for(auto& edg : pslg.edges){
-    PngDrawLine(scaled_points[edg.x].x, scaled_points[edg.x].y, scaled_points[edg.y].x, scaled_points[edg.y].y, 0);
+  for (auto& edg : pslg.edges) {
+    PngDrawLine(scaled_points[edg.x].x, scaled_points[edg.x].y,
+                scaled_points[edg.y].x, scaled_points[edg.y].y, 0);
   }
   for (auto& pt : scaled_holes) {
     pt.x = (pt.x * x) + x;
     pt.y = (pt.y * y) + y;
     PngDrawCircle(pt.x, pt.y, 2, 0xff0000);
+  }
+  bool res = PngWriteData(file_name);
+  PngFreeData();
+  return res;
+}
+
+bool fem::image::WritePng(const std::string& file_name, const unsigned& w,
+                          const unsigned& h, const Mesh& mesh) {
+  PngInitalizeData(w, h);
+  std::vector<Pt> scaled_points = mesh.pts;
+  double x = w / 2.0;
+  double y = h / 2.0;
+  for (auto& pt : scaled_points) {
+    pt.x = (pt.x * (x * 0.98)) + x;
+    pt.y = (pt.y * (y * 0.98)) + y;
+    PngDrawCircle(pt.x, pt.y, 2, 0);
+  }
+  for (auto& edg : mesh.tri) {
+    PngDrawLine(scaled_points[edg.x].x, scaled_points[edg.x].y,
+                scaled_points[edg.y].x, scaled_points[edg.y].y, 0);
+    PngDrawLine(scaled_points[edg.y].x, scaled_points[edg.y].y,
+                scaled_points[edg.z].x, scaled_points[edg.z].y, 0);
+    PngDrawLine(scaled_points[edg.z].x, scaled_points[edg.z].y,
+                scaled_points[edg.x].x, scaled_points[edg.x].y, 0);
+  }
+  bool res = PngWriteData(file_name);
+  PngFreeData();
+  return res;
+}
+bool fem::image::WritePng(const std::string& file_name, const unsigned& w,
+                          const unsigned& h, const Mesh& mesh,
+                          double (*func)(const Mesh& mesh, const Pt&)) {
+  PngInitalizeData(w, h);
+  std::vector<Pt> scaled_points = mesh.pts;
+  double x = w / 2.0;
+  double y = h / 2.0;
+  for (auto& pt : scaled_points) {
+    pt.x = (pt.x * (x * 0.98)) + x;
+    pt.y = (pt.y * (y * 0.98)) + y;
+    PngDrawCircle(pt.x, pt.y, 2, 0);
+  }
+  for (auto& edg : mesh.tri) {
+    PngDrawLine(scaled_points[edg.x].x, scaled_points[edg.x].y,
+                scaled_points[edg.y].x, scaled_points[edg.y].y, 0);
+    PngDrawLine(scaled_points[edg.y].x, scaled_points[edg.y].y,
+                scaled_points[edg.z].x, scaled_points[edg.z].y, 0);
+    PngDrawLine(scaled_points[edg.z].x, scaled_points[edg.z].y,
+                scaled_points[edg.x].x, scaled_points[edg.x].y, 0);
+  }
+  for (unsigned x = 0; x < w; ++x){
+    for(unsigned y = 0; y < h; ++y){
+
+    }
   }
   bool res = PngWriteData(file_name);
   PngFreeData();

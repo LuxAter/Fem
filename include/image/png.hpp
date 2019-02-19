@@ -5,6 +5,7 @@
 
 #include <png.h>
 
+#include "../mesh/mesh.hpp"
 #include "../mesh/pslg.hpp"
 
 namespace fem {
@@ -21,6 +22,11 @@ namespace image {
   void PngDrawCircle(int cx, int cy, unsigned r, uint32_t c, int w = -1);
   bool WritePng(const std::string& file_name, const unsigned& w,
                 const unsigned& h, const PSLG& pslg);
+  bool WritePng(const std::string& file_name, const unsigned& w,
+                const unsigned& h, const Mesh& mesh);
+  bool WritePng(const std::string& file_name, const unsigned& w,
+                const unsigned& h, const Mesh& mesh,
+                double (*func)(const Mesh& mesh, const Pt&));
 }  // namespace image
 }  // namespace fem
 

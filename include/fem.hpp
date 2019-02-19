@@ -5,5 +5,6 @@
 #include "mesh/mesh.hpp"
 #include "math/math.hpp"
 #include "image/image.hpp"
+#include "basis.hpp"
 
 #endif  // FEM_FEM_HPP_
