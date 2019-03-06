@@ -11,6 +11,8 @@ namespace argparse {
     std::map<std::string, bool> flags;
     std::map<std::string, std::string> options;
     std::vector<std::string> args;
+    inline double getf(std::string n) { return std::atof(options[n].c_str()); }
+    inline int geti(std::string n) { return std::atoi(options[n].c_str()); }
   };
 
   Retval parse_args(std::string fmt, int argc, char* argv[]);

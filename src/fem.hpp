@@ -3,6 +3,7 @@
 
 #include "script.hpp"
 #include "argparse.hpp"
+#include "plot.hpp"
 
 namespace fem {
   
