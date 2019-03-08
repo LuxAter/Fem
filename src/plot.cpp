@@ -114,5 +114,7 @@ void fem::plot::write_bmp(const std::string file, uint32_t** buffer,
 
 double fem::plot::clamp(double val, double in_min, double in_max,
                         double out_min, double out_max) {
+  if(val <= in_min) return out_min;
+  else if (val >= in_max) return out_max;
   return out_min + ((out_max - out_min) / (in_max - in_min)) * (val - in_min);
 }

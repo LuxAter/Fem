@@ -425,16 +425,16 @@ def save(file):
         points.append(((pt[0] - c_x) * s_x, (pt[1] - c_y) * s_y))
     for pt in hls:
         holes.append(((pt[0] - c_x) * s_x, (pt[1] - c_y) * s_y))
-    with open(file.strip() + '.pslg', 'w') as out:
-        out.write("{}\n".format(len(points)))
-        for pt in points:
-            out.write("{:f} {:f} ".format(pt[0], pt[1]))
-        out.write("\n{}\n".format(len(edges)))
-        for eg in edges:
-            out.write("{} {} ".format(eg[0], eg[1]))
+    with open(file.strip() + '.poly', 'w') as out:
+        out.write("{} 2 0 1\n".format(len(points)))
+        for i, pt in enumerate(points):
+            out.write("{} {:f} {:f}\n".format(i, pt[0], pt[1]))
+        out.write("\n{} 1\n".format(len(edges)))
+        for i, eg in enumerate(edges):
+            out.write("{} {} {} {}\n".format(i,eg[0], eg[1], i+1))
         out.write("\n{}\n".format(len(holes)))
-        for pt in holes:
-            out.write("{:f} {:f} ".format(pt[0], pt[1]))
+        for i, pt in enumerate(holes):
+            out.write("{} {:f} {:f}\n".format(i,pt[0], pt[1]))
 
 
 def fmt_action(act):

@@ -4,6 +4,7 @@
 #include "script.hpp"
 #include "argparse.hpp"
 #include "plot.hpp"
+#include "mesh.hpp"
 
 namespace fem {
   

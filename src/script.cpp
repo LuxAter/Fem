@@ -26,6 +26,16 @@ bool fem::script::open_script(const std::string& file_name) {
   return true;
 }
 
+double fem::script::call(const double& x, const double& y, std::string func) {
+  lua_getglobal(lua_state_, func.c_str());
+  lua_pushnumber(lua_state_, x);
+  lua_pushnumber(lua_state_, y);
+  lua_pcall(lua_state_, 2, 1, 0);
+  double res = lua_tonumber(lua_state_, -1);
+  lua_pop(lua_state_, 1);
+  return res;
+}
+
 double fem::script::call(const double& x, const double& y, double t,
                          std::string func) {
   lua_getglobal(lua_state_, func.c_str());

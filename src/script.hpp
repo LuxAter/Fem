@@ -13,7 +13,8 @@ extern "C" {
 namespace fem {
 namespace script {
   bool open_script(const std::string& file_name);
-  double call(const double& x, const double& y, double t = 0,
+  double call(const double& x, const double& y, std::string func = "func");
+  double call(const double& x, const double& y, double t,
               std::string func = "func");
   std::vector<double> call(const std::vector<double>& x,
                            const std::vector<double>& y, double t = 0,

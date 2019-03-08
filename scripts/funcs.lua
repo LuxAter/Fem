@@ -150,11 +150,22 @@ function tangent(x, y, t)
   return math.tan(5 * x) * math.tan(5 * y)
 end
 
+function saddle(x, y, t)
+  return math.pow(x, 3.0) - 3 * x * math.pow(y, 2.0)
+end
+
 function dev(x, y, t)
   return 2 * (x - off_x) + 2 * (y - off_y) - 4
 end
 
 function noise(x, y, t)
-  -- return 0.0
   return perlin:noise(x,y,t)
+end
+
+function left(x,y)
+  return x*x
+end
+
+function right(x,y)
+  return y*y
 end
