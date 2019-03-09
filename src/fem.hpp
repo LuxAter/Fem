@@ -6,6 +6,7 @@
 #include "plot.hpp"
 #include "mesh.hpp"
 #include "basis.hpp"
+#include "integrate.hpp"
 
 namespace fem {
   

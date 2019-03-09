@@ -36,6 +36,7 @@ void fem::plot::imsave(std::string file, std::vector<std::vector<double>> vals,
     bool min_v = std::isinf(v_min), max_v = std::isinf(v_max);
     for (auto& row : vals) {
       for (auto& val : row) {
+        if (std::isnan(val)) continue;
         if (min_v) v_min = std::min(v_min, val);
         if (max_v) v_max = std::max(v_max, val);
       }
@@ -43,6 +44,10 @@ void fem::plot::imsave(std::string file, std::vector<std::vector<double>> vals,
   }
   for (std::size_t i = 0; i < h; ++i) {
     for (std::size_t j = 0; j < w; ++j) {
+      if (std::isnan(vals[i][j])) {
+        buffer[i][j] = 0xFFFFFF;
+        continue;
+      }
       buffer[i][j] = color_map[static_cast<unsigned>(
           clamp(vals[i][j], v_min, v_max, 0.0, 255.0))];
     }
@@ -56,8 +61,8 @@ void fem::plot::imsave(std::string file, std::vector<std::vector<double>> vals,
   free(buffer);
 }
 
-void fem::plot::write_bmp(const std::string file, uint32_t** buffer,
-                          unsigned w, unsigned h) {
+void fem::plot::write_bmp(const std::string file, uint32_t** buffer, unsigned w,
+                          unsigned h) {
   unsigned file_size = 54 + 3 * w * h;
 
   uint8_t* byte_data = (uint8_t*)malloc(3 * w * h);
@@ -114,7 +119,9 @@ void fem::plot::write_bmp(const std::string file, uint32_t** buffer,
 
 double fem::plot::clamp(double val, double in_min, double in_max,
                         double out_min, double out_max) {
-  if(val <= in_min) return out_min;
-  else if (val >= in_max) return out_max;
+  if (val <= in_min)
+    return out_min;
+  else if (val >= in_max)
+    return out_max;
   return out_min + ((out_max - out_min) / (in_max - in_min)) * (val - in_min);
 }
