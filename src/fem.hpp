@@ -5,6 +5,7 @@
 #include "argparse.hpp"
 #include "plot.hpp"
 #include "mesh.hpp"
+#include "basis.hpp"
 
 namespace fem {
   

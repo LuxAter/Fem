@@ -34,7 +34,7 @@ fem::mesh::Mesh::Mesh(const std::string& file_path) {
   fscanf(input, "%d %d", &n, &a);
   for (int i = 0; i < n; ++i) {
     int x, y, z;
-    fscanf(input, "%d %d %d %d", &a, &x, &y, &z);
+    fscanf(input, "%d %d %d %d", &a, &y, &z, &x);
     adj.push_back({x, y, z});
   }
   fclose(input);
@@ -71,7 +71,7 @@ int fem::mesh::Mesh::locate(const Pair<double>& pt) const {
         within = false;
       }
     }
-    if (within == true || t != -1) {
+    if (within == true || t == -1) {
       searching = false;
     }
   }
