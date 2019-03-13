@@ -36,3 +36,5 @@ blt.sh
 
 fem
 build/*
+images/*
+.mesh/*

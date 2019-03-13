@@ -15,7 +15,13 @@ def convert_data(name, data):
                 int(color[0] * 255), int(color[1] * 255), int(color[2] * 255)),
             end=' ')
     print("}}},")
-
+    print("{{\"{}_r\", {{{{".format(name))
+    for color in reversed(data):
+        print(
+            "0x{:02x}{:02x}{:02x},".format(
+                int(color[0] * 255), int(color[1] * 255), int(color[2] * 255)),
+            end=' ')
+    print("}}},")
 
 def convert_cmap(name):
     cmap = cm.get_cmap(name)
@@ -92,8 +98,8 @@ def main():
          [0.9588714286, 0.8949, 0.1132428571],
          [0.9598238095, 0.9218333333, 0.0948380952],
          [0.9661, 0.9514428571, 0.0755333333], [0.9763, 0.9831, 0.0538]])
-    for color in plt.colormaps():
-        convert_cmap(color)
+    # for color in plt.colormaps():
+    #     convert_cmap(color)
     print("};")
 
 

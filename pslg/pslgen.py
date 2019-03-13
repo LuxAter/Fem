@@ -248,6 +248,7 @@ def generate_pslg():
             points.append((act[1], act[2]))
         elif act[0] == 2:
             pts = []
+            pts_size = len(pts)
             for theta in linspace(0.0, 6.283184, act[4]):
                 points.append((act[1] + (act[3] * cos(theta)),
                                act[2] + (act[3] * sin(theta))))
@@ -255,7 +256,9 @@ def generate_pslg():
                 edges.append((len(points) - 1, len(points)))
             if act[5]:
                 holes.append(avg(pts))
-            edges = edges[:-1]
+            points = points[:-1]
+            edges = edges[:-2]
+            edges.append((pts_size, len(points) - 1))
         elif act[0] == 3:
             points.append((act[1], act[2]))
             points.append((act[1], act[2] + act[4]))

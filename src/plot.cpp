@@ -45,7 +45,7 @@ void fem::plot::imsave(std::string file, std::vector<std::vector<double>> vals,
   for (std::size_t i = 0; i < h; ++i) {
     for (std::size_t j = 0; j < w; ++j) {
       if (std::isnan(vals[i][j])) {
-        buffer[i][j] = 0xFFFFFF;
+        buffer[i][j] = 0x000000;
         continue;
       }
       buffer[i][j] = color_map[static_cast<unsigned>(
