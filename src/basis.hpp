@@ -8,7 +8,9 @@ namespace fem {
 namespace basis {
   double local_basis(const mesh::Mesh& mesh, const Pair<double>& pt,
                      const unsigned& tri, const unsigned& vert);
-  double local_basis_deriv(const mesh::Mesh& mesh, const Pair<double>& pt,
+  double local_basis_deriv_x(const mesh::Mesh& mesh, const Pair<double>& pt,
+                           const unsigned& tri, const unsigned& vert);
+  double local_basis_deriv_y(const mesh::Mesh& mesh, const Pair<double>& pt,
                            const unsigned& tri, const unsigned& vert);
   double global_basis(const mesh::Mesh& mesh, const Pair<double>& pt,
                       const unsigned& tri, const unsigned& vert);

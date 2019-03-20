@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "vector.hpp"
+
 namespace fem {
 namespace math {
   class Matrix {
@@ -23,6 +25,8 @@ namespace math {
 
     void clear();
 
+    std::string dump() const;
+
     std::vector<unsigned long>* get_row_ptr() { return &row_ptr_; }
     std::vector<unsigned long>* get_col_ind() { return &col_ind_; }
     std::vector<double>* get_vals() { return &vals_; }
@@ -35,6 +39,8 @@ namespace math {
     std::vector<unsigned long> row_ptr_, col_ind_;
     std::vector<double> vals_;
   };
+
+  Vector operator*(const Matrix& lhs, const Vector& rhs);
 
   void save_mat_to_file(const std::string& file_name, const Matrix& mat);
   Matrix load_mat_from_file(const std::string& file_name);

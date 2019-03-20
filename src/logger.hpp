@@ -456,7 +456,7 @@ namespace fem {
     };
 
   }  // namespace log
-}  // namespace fem 
+}  // namespace fem
 
 #pragma clang diagnostic pop
 

@@ -15,18 +15,29 @@ double fem::basis::local_basis(const mesh::Mesh& mesh, const Pair<double>& pt,
          ((y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3));
 }
 
-double fem::basis::local_basis_deriv(const mesh::Mesh& mesh,
-                                     const Pair<double>& pt,
-                                     const unsigned& tri,
-                                     const unsigned& vert) {
+double fem::basis::local_basis_deriv_x(const mesh::Mesh& mesh,
+                                       const Pair<double>& pt,
+                                       const unsigned& tri,
+                                       const unsigned& vert) {
   double x1 = mesh.pts[mesh.tri[tri][vert]].x;
   double y1 = mesh.pts[mesh.tri[tri][vert]].y;
   double x2 = mesh.pts[mesh.tri[tri][(vert + 1) % 3]].x;
   double y2 = mesh.pts[mesh.tri[tri][(vert + 1) % 3]].y;
   double x3 = mesh.pts[mesh.tri[tri][(vert + 2) % 3]].x;
   double y3 = mesh.pts[mesh.tri[tri][(vert + 2) % 3]].y;
-  return ((y2 - y3) * pt.x + (x3 - x2) * pt.y) /
-         ((y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3));
+  return (y2 - y3) / ((y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3));
+}
+double fem::basis::local_basis_deriv_y(const mesh::Mesh& mesh,
+                                       const Pair<double>& pt,
+                                       const unsigned& tri,
+                                       const unsigned& vert) {
+  double x1 = mesh.pts[mesh.tri[tri][vert]].x;
+  double y1 = mesh.pts[mesh.tri[tri][vert]].y;
+  double x2 = mesh.pts[mesh.tri[tri][(vert + 1) % 3]].x;
+  double y2 = mesh.pts[mesh.tri[tri][(vert + 1) % 3]].y;
+  double x3 = mesh.pts[mesh.tri[tri][(vert + 2) % 3]].x;
+  double y3 = mesh.pts[mesh.tri[tri][(vert + 2) % 3]].y;
+  return (x3 - x2) / ((y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3));
 }
 
 double fem::basis::global_basis(const mesh::Mesh& mesh, const Pair<double>& pt,

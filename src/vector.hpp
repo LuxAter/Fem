@@ -23,8 +23,23 @@ namespace math {
 
     void clear() { vals_.clear(); }
 
+    std::string dump() const;
+
     std::vector<double>* get_vals() { return &vals_; }
     const std::vector<double>* get_vals() const { return &vals_; }
+
+    inline Vector& operator+=(const Vector& rhs) {
+      for (unsigned i = 0; i < vals_.size() && i < rhs.size(); ++i) {
+        vals_[i] += rhs.at(i);
+      }
+      return *this;
+    }
+    inline Vector& operator-=(const Vector& rhs) {
+      for (unsigned i = 0; i < vals_.size() && i < rhs.size(); ++i) {
+        vals_[i] -= rhs.at(i);
+      }
+      return *this;
+    }
 
    private:
     std::vector<double> vals_;

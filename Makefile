@@ -115,8 +115,8 @@ pre-libfem.a:
 $(LIBFEM.A): $(LIBFEM.A_OBJS) FORCE
 	$(call print_link_lib,$(shell basename $(LIBFEM.A)))
 	ar rcs $@ $(LIBFEM.A_OBJS)
-	mkdir -p $(ROOT)/tmp/libpng.a && cd $(ROOT)/tmp/libpng.a && ar x $(ROOT)/build/libpng.a/lib/libpng.a && ar qc $(ROOT)/$@ $(ROOT)/tmp/libpng.a/*.o && rm -rf $(ROOT)/tmp/libpng.a
-	rmdir $(ROOT)/tmp/
+	# mkdir -p $(ROOT)/tmp/libpng.a && cd $(ROOT)/tmp/libpng.a && ar x $(ROOT)/build/libpng.a/lib/libpng.a && ar qc $(ROOT)/$@ $(ROOT)/tmp/libpng.a/*.o && rm -rf $(ROOT)/tmp/libpng.a
+	# rmdir $(ROOT)/tmp/
 
 install-libfem.a: build-libfem.a
 	$(call install_target,$(shell basename $(LIBFEM.A)))

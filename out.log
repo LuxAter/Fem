@@ -1,1 +1,1 @@
-[INFO   ] <2019-03-12 19:21:34> (src/mesh.cpp:Mesh:98) No boundary condition file specified.
+[DEBUG  ] <2019-03-20 16:09:01> (src/main.cpp:main:141) ERROR: +000.0000000001

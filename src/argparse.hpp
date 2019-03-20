@@ -16,6 +16,8 @@ namespace argparse {
   };
 
   Retval parse_args(std::string fmt, int argc, char* argv[]);
+  void print_help(const char** help, unsigned n, std::string usage = "",
+                  std::string cmd = "");
 }  // namespace argparse
 }  // namespace fem
 

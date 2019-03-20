@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "mesh.hpp"
+#include "script.hpp"
 
 const static double weights_[64] = {
     0.3335674062677772E-03, 0.7327880811491046E-03, 0.1033723454167925E-02,
@@ -73,8 +74,8 @@ const static double pts_[128] = {
     0.7492042865547208,     0.1777991514999999E-01, 0.8823609499461815,
     0.1777991514999999E-01, 0.9627180345898023};
 
-double fem::math::integrate(double (*func)(double, double), unsigned tri,
-                            const mesh::Mesh& mesh) {
+double fem::math::integrate(std::function<double(double, double)> func,
+                            unsigned tri, const mesh::Mesh& mesh) {
   double sum = 0;
   double x1 = mesh.pts[mesh.tri[tri][0]].x;
   double y1 = mesh.pts[mesh.tri[tri][0]].y;
@@ -89,6 +90,26 @@ double fem::math::integrate(double (*func)(double, double), unsigned tri,
                                 (1.0 - pts_[2 * i] - pts_[(2 * i) + 1]) * x3,
                             pts_[2 * i] * y1 + pts_[(2 * i) + 1] * y2 +
                                 (1.0 - pts_[2 * i] - pts_[(2 * i) + 1]) * y3));
+  }
+  return area * sum;
+}
+double fem::math::integrate(const std::string& func, unsigned tri,
+                            const mesh::Mesh& mesh) {
+  double sum = 0;
+  double x1 = mesh.pts[mesh.tri[tri][0]].x;
+  double y1 = mesh.pts[mesh.tri[tri][0]].y;
+  double x2 = mesh.pts[mesh.tri[tri][1]].x;
+  double y2 = mesh.pts[mesh.tri[tri][1]].y;
+  double x3 = mesh.pts[mesh.tri[tri][2]].x;
+  double y3 = mesh.pts[mesh.tri[tri][2]].y;
+  double area = fabs((x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)) / 2.0);
+  for (unsigned i = 0; i < 64; ++i) {
+    sum += (weights_[i] *
+            script::call(pts_[2 * i] * x1 + pts_[(2 * i) + 1] * x2 +
+                             (1.0 - pts_[2 * i] - pts_[(2 * i) + 1]) * x3,
+                         pts_[2 * i] * y1 + pts_[(2 * i) + 1] * y2 +
+                             (1.0 - pts_[2 * i] - pts_[(2 * i) + 1]) * y3,
+                         func));
   }
   return area * sum;
 }

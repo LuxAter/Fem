@@ -7,6 +7,12 @@
 #include "mesh.hpp"
 #include "basis.hpp"
 #include "integrate.hpp"
+#include "matrix.hpp"
+#include "vector.hpp"
+#include "pde.hpp"
+#include "linalg.hpp"
+#include "logger.hpp"
+#include "print.hpp"
 
 namespace fem {
   

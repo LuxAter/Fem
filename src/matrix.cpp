@@ -6,6 +6,8 @@
 #include <vector>
 
 #include "logger.hpp"
+#include "vector.hpp"
+#include "print.hpp"
 
 fem::math::Matrix::Matrix() : size_(0) {}
 fem::math::Matrix::Matrix(unsigned long n) : size_(n), row_ptr_(n + 1, 0) {}
@@ -105,6 +107,34 @@ void fem::math::Matrix::clear() {
   row_ptr_ = std::vector<unsigned long>(size_ + 1, 0);
   col_ind_.clear();
   vals_.clear();
+}
+
+std::string fem::math::Matrix::dump() const {
+  std::string str;
+  for (int r = 0; r < size_; ++r) {
+    for (int c = 0; c < size_; ++c) {
+      str += fem::fmt_val(at(r, c));
+      if (c < size_ - 1) {
+        str += " ";
+      }
+    }
+    if (r < size_ - 1) {
+      str += "\n";
+    }
+  }
+  return str;
+}
+
+fem::math::Vector fem::math::operator*(const Matrix& lhs, const Vector& rhs) {
+  Vector res(lhs.size());
+  for (unsigned long r = 0; r < lhs.size(); ++r) {
+    double sum = 0.0;
+    for (unsigned long c = 0; c < rhs.size() && c < lhs.size(); ++c) {
+      sum += (lhs.at(r, c) * rhs.at(c));
+    }
+    res.set(r, sum);
+  }
+  return res;
 }
 
 void fem::math::save_mat_to_file(const std::string& file_name,
