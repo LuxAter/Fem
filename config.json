@@ -21,13 +21,6 @@
     "path": "$(BUILD)/libfem.a",
     "files_exclude": "src/main.cpp",
     "files": "src/*.cpp",
-    "dep": ["libpng.a"],
-    "join": true,
     "type": "lib"
-  },
-  "libpng.a": {
-    "path": "$(ROOT)/{{build}}/libpng.a",
-    "source": "libpng",
-    "type": "aumake"
   }
 }

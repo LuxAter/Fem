@@ -102,10 +102,10 @@ LIBFEM.A_FILES=$(filter-out src/main.cpp, $(shell find "src/" -name "*.cpp"))
 LIBFEM.A_OBJS=$(LIBFEM.A_FILES:%=$(ROOT)/$(BUILD)/%.o)
 -include $(LIBFEM.A_OBJS:.o=.d)
 
-build-libfem.a: build-libpng.a pre-libfem.a $(LIBFEM.A)
+build-libfem.a:  pre-libfem.a $(LIBFEM.A)
 	$(call complete_target,$(shell basename $(LIBFEM.A)))
 
-clean-libfem.a: clean-libpng.a
+clean-libfem.a: 
 	$(call clean_target,$(shell basename $(LIBFEM.A)))
 	if [ -e "$(LIBFEM.A)" ]; then rm $(LIBFEM.A); fi
 
@@ -115,8 +115,7 @@ pre-libfem.a:
 $(LIBFEM.A): $(LIBFEM.A_OBJS) FORCE
 	$(call print_link_lib,$(shell basename $(LIBFEM.A)))
 	ar rcs $@ $(LIBFEM.A_OBJS)
-	# mkdir -p $(ROOT)/tmp/libpng.a && cd $(ROOT)/tmp/libpng.a && ar x $(ROOT)/build/libpng.a/lib/libpng.a && ar qc $(ROOT)/$@ $(ROOT)/tmp/libpng.a/*.o && rm -rf $(ROOT)/tmp/libpng.a
-	# rmdir $(ROOT)/tmp/
+	
 
 install-libfem.a: build-libfem.a
 	$(call install_target,$(shell basename $(LIBFEM.A)))
@@ -131,23 +130,6 @@ uninstall-libfem.a:
 	$(call uninstall_target,$(shell basename $(LIBFEM.A)))
 	if [ ! -e "$(INSTALL_PATH)/lib/$(shell basename $(LIBFEM.A))" ]; then rm $(INSTALL_PATH)/lib/$(shell basename $(LIBFEM.A)); fi
 	if [ ! -e "$(INSTALL_PATH)/include/$(NAME)" ]; then rm $(INSTALL_PATH)/include/$(NAME) -r; fi
-
-# }}}
-# LIBPNG.A {{{
-
-build-libpng.a: pre-libpng.a
-	if [ ! -f "libpng/configure" ]; then $(call print_run_cmd,autogen.sh) && cd libpng && ./autogen.sh; fi
-	if [ ! -f "libpng/Makefile" ]; then $(call print_run_cmd,configure) && cd libpng && ./configure --prefix=$(ROOT)/build/libpng.a; fi
-	if [ ! -d "$(ROOT)/build/libpng.a" ]; then $(call print_run_cmd,make) && cd libpng && make install; fi
-	$(call complete_target,libpng.a)
-
-clean-libpng.a:
-	$(call clean_target,libpng.a)
-	if [ -e "libpng/Makefile" ]; then cd libpng && make clean && rm Makefile; fi
-	if [ -d "$(ROOT)/build/libpng.a" ]; then rm $(ROOT)/build/libpng.a -r; fi
-
-pre-libpng.a:
-	$(call scan_target,libpng.a)
 
 # }}}
 

@@ -6,8 +6,8 @@
 #include <vector>
 
 #include "logger.hpp"
-#include "vector.hpp"
 #include "print.hpp"
+#include "vector.hpp"
 
 fem::math::Matrix::Matrix() : size_(0) {}
 fem::math::Matrix::Matrix(unsigned long n) : size_(n), row_ptr_(n + 1, 0) {}
@@ -174,7 +174,8 @@ fem::math::Matrix fem::math::load_mat_from_file(const std::string& file_name) {
   std::vector<unsigned long>* row_ptr = mat.get_row_ptr();
   std::vector<unsigned long>* col_ind = mat.get_col_ind();
   std::vector<double>* vals = mat.get_vals();
-  for (unsigned long i = 0; i < size; ++i) {
+  row_ptr->clear();
+  for (unsigned long i = 0; i <= size; ++i) {
     unsigned long rp;
     fscanf(src, "%lu", &rp);
     row_ptr->push_back(rp);

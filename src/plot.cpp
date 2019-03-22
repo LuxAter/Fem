@@ -1,5 +1,6 @@
 #include "plot.hpp"
 
+#include <algorithm>
 #include <array>
 #include <string>
 #include <vector>
@@ -9,9 +10,95 @@
 #include <cstring>
 
 #include "cmaps.hpp"
+#include "logger.hpp"
+#include "mesh.hpp"
+
+void fem::plot::line_low(uint32_t** buffer, unsigned x0, unsigned y0,
+                         unsigned x1, unsigned y1, const unsigned& w,
+                         const unsigned& h) {
+  int dx = x1 - x0, dy = y1 - y0, yi = 1;
+  if (dy < 0) {
+    yi = -1;
+    dy = -dy;
+  }
+  int d = 2 * dy - dx;
+  int y = y0;
+  for (int x = x0; x <= x1; ++x) {
+    buffer[y][x] = 0x000000;
+    if (d > 0) {
+      y += yi;
+      d -= (2 * dx);
+    }
+    d += (2 * dy);
+  }
+}
+void fem::plot::line_high(uint32_t** buffer, unsigned x0, unsigned y0,
+                          unsigned x1, unsigned y1, const unsigned& w,
+                          const unsigned& h) {
+  int dx = x1 - x0, dy = y1 - y0, xi = 1;
+  if (dx < 0) {
+    xi = -1;
+    dx = -dx;
+  }
+  int d = 2 * dx - dy;
+  int x = x0;
+  for (int y = y0; y <= y1; ++y) {
+    buffer[y][x] = 0x000000;
+    if (d > 0) {
+      x += xi;
+      d -= (2 * dy);
+    }
+    d += (2 * dx);
+  }
+}
+void fem::plot::line(uint32_t** buffer, unsigned x0, unsigned y0, unsigned x1,
+                     unsigned y1, const unsigned& w, const unsigned& h) {
+  if (labs((int64_t)y1 - (int64_t)y0) < labs((int64_t)x1 - (int64_t)x0)) {
+    if (x0 > x1) {
+      line_low(buffer, x1, y1, x0, y0, w, h);
+    } else {
+      line_low(buffer, x0, y0, x1, y1, w, h);
+    }
+  } else {
+    if (y0 > y1) {
+      line_high(buffer, x1, y1, x0, y0, w, h);
+    } else {
+      line_high(buffer, x0, y0, x1, y1, w, h);
+    }
+  }
+}
+
+void fem::plot::overlay(uint32_t** buffer, const mesh::Mesh& mesh,
+                        const unsigned& w, const unsigned& h) {
+  std::vector<Pair<long>> edges;
+  for (unsigned long t = 0; t < mesh.tri.size(); ++t) {
+    for (unsigned long i = 0; i < 3; ++i) {
+      Pair<long> e = {mesh.tri[t][(i) % 3], mesh.tri[t][(i + 1) % 3]};
+      Pair<long> r = {mesh.tri[t][(i + 1) % 3], mesh.tri[t][(i) % 3]};
+      if (std::find(edges.begin(), edges.end(), e) == edges.end() &&
+          std::find(edges.begin(), edges.end(), r) == edges.end()) {
+        edges.push_back(e);
+      }
+    }
+  }
+  double sx = (double)w / (mesh.bounds[2] - mesh.bounds[0]);
+  double sy = (double)h / (mesh.bounds[3] - mesh.bounds[1]);
+  double off_x = mesh.bounds[0];
+  double off_y = mesh.bounds[1];
+  for (unsigned long i = 0; i < edges.size(); ++i) {
+    unsigned x0 = std::min(sx * (mesh.pts[edges[i][0]][0] - off_x), 499.0);
+    unsigned y0 = std::min(sy * (mesh.pts[edges[i][0]][1] - off_y), 499.0);
+    unsigned x1 = std::min(sx * (mesh.pts[edges[i][1]][0] - off_x), 499.0);
+    unsigned y1 = std::min(sy * (mesh.pts[edges[i][1]][1] - off_y), 499.0);
+
+    line(buffer, x0, y0, x1, y1, w, h);
+    // TODO DRAW LINE HERE!
+  }
+}
 
 void fem::plot::imsave(std::string file, std::vector<std::vector<double>> vals,
-                       std::string cmap, double v_min, double v_max) {
+                       std::string cmap, double v_min, double v_max,
+                       const mesh::Mesh* mesh) {
   unsigned w = vals.front().size(), h = vals.size();
   uint32_t** buffer;
   buffer = (uint32_t**)malloc(h * sizeof(uint32_t*));
@@ -51,6 +138,9 @@ void fem::plot::imsave(std::string file, std::vector<std::vector<double>> vals,
       buffer[i][j] = color_map[static_cast<unsigned>(
           clamp(vals[i][j], v_min, v_max, 0.0, 255.0))];
     }
+  }
+  if (mesh != NULL) {
+    overlay(buffer, *mesh, w, h);
   }
   if (file.find(".bmp") != std::string::npos) {
     write_bmp(file, buffer, w, h);

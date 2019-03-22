@@ -38,4 +38,4 @@ fem
 build/*
 images/*
 .mesh/*
-
+mesh/*

@@ -51,7 +51,11 @@ if [[ -z $OUT ]]; then
   OUT="./.mesh/${OUT%.*}"
 fi
 
-mv "$FILE.poly" "$OUT.poly"
-mv "$FILE.ele" "$OUT.ele"
-mv "$FILE.node" "$OUT.node"
-mv "$FILE.neigh" "$OUT.neigh"
+if [[ ! -d "$OUT" ]]; then
+  mkdir -p "$OUT"
+fi
+
+mv "$FILE.poly" "$OUT/$(basename $OUT).poly"
+mv "$FILE.ele" "$OUT/$(basename $OUT).ele"
+mv "$FILE.node" "$OUT/$(basename $OUT).node"
+mv "$FILE.neigh" "$OUT/$(basename $OUT).neigh"

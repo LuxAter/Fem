@@ -29,6 +29,8 @@ namespace mesh {
       return boundary_index[point_index] != 0;
     }
 
+    void save_tikz(const std::string& file_path)  const;
+
    protected:
    private:
   };

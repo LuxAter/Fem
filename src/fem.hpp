@@ -13,6 +13,7 @@
 #include "linalg.hpp"
 #include "logger.hpp"
 #include "print.hpp"
+#include "file.hpp"
 
 namespace fem {
   

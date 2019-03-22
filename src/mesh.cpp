@@ -1,6 +1,7 @@
 #include "mesh.hpp"
 
 #include <unistd.h>
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -10,14 +11,16 @@
 #include <iostream>
 
 #include "geometry.hpp"
-#include "script.hpp"
 #include "logger.hpp"
+#include "script.hpp"
 
 fem::mesh::Mesh::Mesh(const std::string& file_path) {
+  std::string base_name = file_path.substr(file_path.find_last_of('/') + 1);
   bounds = {{INFINITY, INFINITY, -INFINITY, -INFINITY}};
-  FILE* input = fopen((file_path + ".node").c_str(), "r");
-  if(!input){
-    log::warning("Failed to open \"%s.node", file_path.c_str());
+  FILE* input = fopen((file_path + '/' + base_name + ".node").c_str(), "r");
+  if (!input) {
+    log::warning("Failed to open \"%s/%s.node", file_path.c_str(),
+                 base_name.c_str());
     return;
   }
   int n, a, b, c;
@@ -33,9 +36,10 @@ fem::mesh::Mesh::Mesh(const std::string& file_path) {
     boundary_index.push_back(c);
   }
   fclose(input);
-  input = fopen((file_path + ".ele").c_str(), "r");
-  if(!input){
-    log::warning("Failed to open \"%s.ele", file_path.c_str());
+  input = fopen((file_path + '/' + base_name + ".ele").c_str(), "r");
+  if (!input) {
+    log::warning("Failed to open \"%s/%s.ele", file_path.c_str(),
+                 base_name.c_str());
     return;
   }
   fscanf(input, "%d %d %d", &n, &a, &b);
@@ -45,9 +49,10 @@ fem::mesh::Mesh::Mesh(const std::string& file_path) {
     tri.push_back({x, y, z});
   }
   fclose(input);
-  input = fopen((file_path + ".neigh").c_str(), "r");
-  if(!input){
-    log::warning("Failed to open \"%s.neigh", file_path.c_str());
+  input = fopen((file_path + '/' + base_name + ".neigh").c_str(), "r");
+  if (!input) {
+    log::warning("Failed to open \"%s/%s.neigh", file_path.c_str(),
+                 base_name.c_str());
     return;
   }
   fscanf(input, "%d %d", &n, &a);
@@ -57,9 +62,10 @@ fem::mesh::Mesh::Mesh(const std::string& file_path) {
     adj.push_back({x, y, z});
   }
   fclose(input);
-  input = fopen((file_path + ".poly").c_str(), "r");
-  if(!input){
-    log::warning("Failed to open \"%s.poly", file_path.c_str());
+  input = fopen((file_path + '/' + base_name + ".poly").c_str(), "r");
+  if (!input) {
+    log::warning("Failed to open \"%s/%s.poly", file_path.c_str(),
+                 base_name.c_str());
     return;
   }
   fscanf(input, "%d %d %d %d", &n, &a, &b, &c);
@@ -78,8 +84,8 @@ fem::mesh::Mesh::Mesh(const std::string& file_path) {
   else
     has_holes = false;
   fclose(input);
-  if (access((file_path + ".bc").c_str(), F_OK) != -1) {
-    input = fopen((file_path + ".bc").c_str(), "r");
+  if (access((file_path + '/' + base_name + ".bc").c_str(), F_OK) != -1) {
+    input = fopen((file_path + '/' + base_name + ".bc").c_str(), "r");
     fscanf(input, "%d", &n);
     bc = std::vector<std::string>(n + 1, "0.0");
     char buff[256];
@@ -94,8 +100,9 @@ fem::mesh::Mesh::Mesh(const std::string& file_path) {
       bc[a] = buff;
     }
     fclose(input);
-  }else{
-    log::info("No boundary condition file specified.");
+  } else {
+    log::info("Boundary condition file should be of the form \"%s/%s.bc",
+              file_path.c_str(), base_name.c_str());
   }
 }
 
@@ -149,4 +156,29 @@ double fem::mesh::Mesh::boundary(const unsigned long& point_index) const {
   } else {
     return std::atof(bc[boundary_index[point_index]].c_str());
   }
+}
+
+void fem::mesh::Mesh::save_tikz(const std::string& file_path) const {
+  FILE* out = fopen(file_path.c_str(), "w");
+  if (!out) return;
+  fprintf(out, "\\begin{tikzpicture}[scale=1.0]\n");
+  std::vector<Pair<long>> edges;
+  for (unsigned long t = 0; t < tri.size(); ++t) {
+    for (unsigned long i = 0; i < 3; ++i) {
+      Pair<long> e = {tri[t][(i) % 3], tri[t][(i + 1) % 3]};
+      Pair<long> r = {tri[t][(i + 1) % 3], tri[t][(i) % 3]};
+      if (std::find(edges.begin(), edges.end(), e) == edges.end() &&
+          std::find(edges.begin(), edges.end(), r) == edges.end()) {
+        edges.push_back(e);
+      }
+    }
+  }
+  for (unsigned long i = 0; i < edges.size(); ++i) {
+    fprintf(out,
+            "  \\draw (%+015.10lf,%+015.10lf) -- (%+015.10lf,%+015.10lf);\n",
+            pts[edges[i][0]][0], pts[edges[i][0]][1], pts[edges[i][1]][0],
+            pts[edges[i][1]][1]);
+  }
+  fprintf(out, "\\end{tikzpicture}");
+  fclose(out);
 }
