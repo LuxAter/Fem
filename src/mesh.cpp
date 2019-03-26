@@ -88,6 +88,7 @@ fem::mesh::Mesh::Mesh(const std::string& file_path) {
     input = fopen((file_path + '/' + base_name + ".bc").c_str(), "r");
     fscanf(input, "%d", &n);
     bc = std::vector<std::string>(n + 1, "0.0");
+    std::vector<bool> seen(n + 1, false);
     char buff[256];
     for (int i = 0; i < n; ++i) {
       int c;
@@ -98,6 +99,12 @@ fem::mesh::Mesh::Mesh(const std::string& file_path) {
       ungetc(c, input);
       fscanf(input, "%d %255s", &a, buff);
       bc[a] = buff;
+      seen[a] = true;
+      if (a == 0) {
+        for (std::size_t j = 0; j < n+1; ++j) {
+          if (!seen[j]) bc[j] = buff;
+        }
+      }
     }
     fclose(input);
   } else {

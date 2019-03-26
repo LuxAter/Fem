@@ -1,8 +1,12 @@
-function soln(x, y, t)
-  return math.pow(x - 0.5, 2.0) + math.pow(y - 0.2, 2.0)
+rho = 1
+cp = 1
+u = {1, 1}
+k = 1
+
+function soln(x, y)
+  return math.sin(3.0 * x) + math.cos(3.0 * y)
 end
 
-function forcing(x, y, t)
-  return 0.0
-  -- return 2 * (x + y - 1.7)
+function force(x, y)
+  return 3.0*(math.cos(3.0*x)-math.sin(3.0*y)) + 9.0*k*(math.sin(3.0*x)+math.cos(3.0*y))
 end

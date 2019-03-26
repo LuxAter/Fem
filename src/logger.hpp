@@ -358,7 +358,7 @@ namespace log {
 
    protected:
     virtual void handle_log(const LogType& type, const std::string& log_msg) {
-      fprintf(file, "%s", log_msg.c_str());
+      fprintf(file, "%s\n", log_msg.c_str());
       if ((flush_types & type) == type) fflush(file);
     }
     unsigned flush_types = FATAL | ERROR | WARNING;

@@ -86,10 +86,10 @@ void fem::plot::overlay(uint32_t** buffer, const mesh::Mesh& mesh,
   double off_x = mesh.bounds[0];
   double off_y = mesh.bounds[1];
   for (unsigned long i = 0; i < edges.size(); ++i) {
-    unsigned x0 = std::min(sx * (mesh.pts[edges[i][0]][0] - off_x), 499.0);
-    unsigned y0 = std::min(sy * (mesh.pts[edges[i][0]][1] - off_y), 499.0);
-    unsigned x1 = std::min(sx * (mesh.pts[edges[i][1]][0] - off_x), 499.0);
-    unsigned y1 = std::min(sy * (mesh.pts[edges[i][1]][1] - off_y), 499.0);
+    unsigned x0 = std::min(sx * (mesh.pts[edges[i][0]][0] - off_x), (double)w - 1.0);
+    unsigned y0 = std::min(sy * (mesh.pts[edges[i][0]][1] - off_y), (double)h - 1.0);
+    unsigned x1 = std::min(sx * (mesh.pts[edges[i][1]][0] - off_x), (double)w - 1.0);
+    unsigned y1 = std::min(sy * (mesh.pts[edges[i][1]][1] - off_y), (double)h - 1.0);
 
     line(buffer, x0, y0, x1, y1, w, h);
     // TODO DRAW LINE HERE!

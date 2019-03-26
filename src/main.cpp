@@ -18,6 +18,7 @@ const char* argparse_str =
     "p|plot: "
     "pt|plot-tri: "
     "pb|plot-both: "
+    "pf|plot-func: "
     "tp|tikz-plot: "
     "tt|tikz-tri: "
     "tb|tikz-both: "
@@ -103,7 +104,7 @@ int main(int argc, char* argv[]) {
     for (unsigned long e = 0; e < mesh.tri.size(); ++e) {
       for (unsigned long i = 0; i < 3; ++i) {
         F[mesh.tri[e][i]] +=
-            fem::math::integrate(fem::sys_rhs(mesh, e, i, "forcing"), e, mesh);
+            fem::math::integrate(fem::sys_rhs(mesh, e, i, "force"), e, mesh);
         if (!args.flags["load-system"]) {
           for (unsigned long j = 0; j < 3; ++j) {
             A.set(
@@ -168,9 +169,6 @@ int main(int argc, char* argv[]) {
   if (!args.flags["no-save"] && !args.flags["load-approx"]) {
     fem::math::save_vec_to_file(args.options["mesh"] + "/coef.vec", U);
   }
-
-  // fem::log::debug("ERROR: %s",
-  //                 fem::fmt_val(fem::math::norm(F - (A * U))).c_str());
   fem::log::success("SOLVE SYSTEM");
 
   /////////////////////////////////////////////////////////////////////////////
@@ -220,6 +218,28 @@ int main(int argc, char* argv[]) {
     }
     fem::plot::imsave(args.options["plot-tri"], vals, args.options["cmap"]);
     fem::log::success("PLOT TRIANGLES");
+  }
+
+  if (args.options["plot-func"] != "") {
+    fem::log::status("PLOT FUNCTION");
+    float res = args.geti("res");
+    float step = (mesh.bounds[2] - mesh.bounds[0]) / res;
+    std::vector<std::vector<double>> vals;
+    for (double y = mesh.bounds[1]; y <= mesh.bounds[3]; y += step) {
+      vals.push_back(std::vector<double>());
+      for (double x = mesh.bounds[0]; x <= mesh.bounds[2]; x += step) {
+        int t = mesh.locate({x, y});
+        if (t < 0) {
+          vals.back().push_back(std::numeric_limits<double>::quiet_NaN());
+          continue;
+        }
+        vals.back().push_back(
+            fem::script::call(x, y, args.options["plot-func"]));
+      }
+    }
+    fem::plot::imsave(args.options["plot-func"] + ".bmp", vals,
+                      args.options["cmap"]);
+    fem::log::success("PLOT FUNCTION");
   }
 
   /////////////////////////////////////////////////////////////////////////////
