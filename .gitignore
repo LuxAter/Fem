@@ -1,3 +1,8 @@
+
+# Created by https://www.gitignore.io/api/c++,cmake,lua,make
+# Edit at https://www.gitignore.io/?templates=c++,cmake,lua,make
+
+### C++ ###
 # Prerequisites
 *.d
 
@@ -31,11 +36,50 @@
 *.out
 *.app
 
-animation
-blt.sh
+### CMake ###
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
 
-fem
-build/*
-images/*
-.mesh/*
-mesh/*
+### CMake Patch ###
+# External projects
+*-prefix/
+
+### Lua ###
+# Compiled Lua sources
+luac.out
+
+# luarocks build files
+*.src.rock
+*.zip
+*.tar.gz
+
+# Object files
+*.os
+*.ko
+*.elf
+
+# Precompiled Headers
+
+# Libraries
+*.def
+*.exp
+
+# Shared objects (inc. Windows DLLs)
+*.so.*
+
+# Executables
+*.i*86
+*.x86_64
+*.hex
+# End of https://www.gitignore.io/api/c++,cmake,lua
+
+build/

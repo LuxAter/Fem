@@ -1,5 +1,5 @@
-#ifndef FEM_LOGGER_HPP_
-#define FEM_LOGGER_HPP_
+#ifndef ARTA_LOGGER_HPP_
+#define ARTA_LOGGER_HPP_
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
@@ -10,37 +10,37 @@
 #include <ctime>
 #include <string>
 
-namespace fem {
+namespace arta {
 namespace log {
 #define Default() Logger::get()
-#define Console() Logger::get()->get_logger(fem::log::Logger::CONSOLE)
-#define OutFile() Logger::get()->get_logger(fem::log::Logger::OUT_FILE)
-#define fatal(msg, ...)                                                   \
-  Logger::get()->_log(fem::log::FATAL, msg, __FILE__, __func__, __LINE__, \
+#define Console() Logger::get()->get_logger(arta::log::Logger::CONSOLE)
+#define OutFile() Logger::get()->get_logger(arta::log::Logger::OUT_FILE)
+#define fatal(msg, ...)                                                    \
+  Logger::get()->_log(arta::log::FATAL, msg, __FILE__, __func__, __LINE__, \
                       ##__VA_ARGS__)
-#define error(msg, ...)                                                   \
-  Logger::get()->_log(fem::log::ERROR, msg, __FILE__, __func__, __LINE__, \
+#define error(msg, ...)                                                    \
+  Logger::get()->_log(arta::log::ERROR, msg, __FILE__, __func__, __LINE__, \
                       ##__VA_ARGS__)
-#define warning(msg, ...)                                                   \
-  Logger::get()->_log(fem::log::WARNING, msg, __FILE__, __func__, __LINE__, \
+#define warning(msg, ...)                                                    \
+  Logger::get()->_log(arta::log::WARNING, msg, __FILE__, __func__, __LINE__, \
                       ##__VA_ARGS__)
-#define status(msg, ...)                                                   \
-  Logger::get()->_log(fem::log::STATUS, msg, __FILE__, __func__, __LINE__, \
+#define status(msg, ...)                                                    \
+  Logger::get()->_log(arta::log::STATUS, msg, __FILE__, __func__, __LINE__, \
                       ##__VA_ARGS__)
-#define success(msg, ...)                                                   \
-  Logger::get()->_log(fem::log::SUCCESS, msg, __FILE__, __func__, __LINE__, \
+#define success(msg, ...)                                                    \
+  Logger::get()->_log(arta::log::SUCCESS, msg, __FILE__, __func__, __LINE__, \
                       ##__VA_ARGS__)
-#define debug(msg, ...)                                                   \
-  Logger::get()->_log(fem::log::DEBUG, msg, __FILE__, __func__, __LINE__, \
+#define debug(msg, ...)                                                    \
+  Logger::get()->_log(arta::log::DEBUG, msg, __FILE__, __func__, __LINE__, \
                       ##__VA_ARGS__)
-#define trace(msg, ...)                                                   \
-  Logger::get()->_log(fem::log::TRACE, msg, __FILE__, __func__, __LINE__, \
+#define trace(msg, ...)                                                    \
+  Logger::get()->_log(arta::log::TRACE, msg, __FILE__, __func__, __LINE__, \
                       ##__VA_ARGS__)
-#define info(msg, ...)                                                   \
-  Logger::get()->_log(fem::log::INFO, msg, __FILE__, __func__, __LINE__, \
+#define info(msg, ...)                                                    \
+  Logger::get()->_log(arta::log::INFO, msg, __FILE__, __func__, __LINE__, \
                       ##__VA_ARGS__)
-#define version(msg, ...)                                                   \
-  Logger::get()->_log(fem::log::VERSION, msg, __FILE__, __func__, __LINE__, \
+#define version(msg, ...)                                                    \
+  Logger::get()->_log(arta::log::VERSION, msg, __FILE__, __func__, __LINE__, \
                       ##__VA_ARGS__)
 
   enum LogType {
@@ -473,8 +473,8 @@ namespace log {
   };
 
 }  // namespace log
-}  // namespace fem
+}  // namespace arta
 
 #pragma clang diagnostic pop
 
-#endif  // FEM_LOGGER_HPP_
+#endif  // ARTA_LOGGER_HPP_
