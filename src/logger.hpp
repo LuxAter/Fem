@@ -472,6 +472,13 @@ namespace log {
     unsigned logger_ = CONSOLE | OUT_FILE;
   };
 
+  inline void error_log(const std::string file, const std::string msg, ...) {
+    va_list args;
+    va_start(args, msg);
+    Logger::get()->_log(arta::log::FATAL, msg, file, 0, 0, args);
+    va_end(args);
+  }
+
 }  // namespace log
 }  // namespace arta
 

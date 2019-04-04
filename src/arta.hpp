@@ -2,7 +2,7 @@
 #define ARTA_HPP_
 
 #define ARTA_VERSION_MAJOR 3
-#define ARTA_VERSION_MINOR 0
+#define ARTA_VERSION_MINOR 1
 
 #include "logger.hpp"
 
