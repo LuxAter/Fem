@@ -9,12 +9,12 @@
 #include "../logger.hpp"
 #include "../print.hpp"
 
-arta::math::Vector::Vector() : vals_() {}
-arta::math::Vector::Vector(unsigned long n) : vals_(n, 0.0) {}
-arta::math::Vector::Vector(unsigned long n, double v) : vals_(n, v) {}
-arta::math::Vector::Vector(const Vector& copy) : vals_(copy.vals_) {}
+arta::linalg::Vector::Vector() : vals_() {}
+arta::linalg::Vector::Vector(unsigned long n) : vals_(n, 0.0) {}
+arta::linalg::Vector::Vector(unsigned long n, double v) : vals_(n, v) {}
+arta::linalg::Vector::Vector(const Vector& copy) : vals_(copy.vals_) {}
 
-std::string arta::math::Vector::dump() const {
+std::string arta::linalg::Vector::dump() const {
   std::string str;
   for (int i = 0; i < vals_.size(); ++i) {
     str += arta::fmt_val(vals_[i]);
@@ -25,7 +25,7 @@ std::string arta::math::Vector::dump() const {
   return str;
 }
 
-void arta::math::save_vec_to_file(const std::string& file_name,
+void arta::linalg::save_vec_to_file(const std::string& file_name,
                                   const Vector& vec) {
   FILE* out = fopen(file_name.c_str(), "w");
   if (!out) {
@@ -39,7 +39,7 @@ void arta::math::save_vec_to_file(const std::string& file_name,
   }
   fclose(out);
 }
-arta::math::Vector arta::math::load_vec_from_file(
+arta::linalg::Vector arta::linalg::load_vec_from_file(
     const std::string& file_name) {
   FILE* src = fopen(file_name.c_str(), "r");
   if (!src) {
@@ -56,21 +56,21 @@ arta::math::Vector arta::math::load_vec_from_file(
   return vec;
 }
 
-arta::math::Vector arta::math::operator+(const Vector& lhs, const Vector& rhs) {
+arta::linalg::Vector arta::linalg::operator+(const Vector& lhs, const Vector& rhs) {
   Vector vec(std::min(lhs.size(), rhs.size()));
   for (unsigned long i = 0; i < vec.size(); ++i) {
     vec.set(i, lhs.at(i) + rhs.at(i));
   }
   return vec;
 }
-arta::math::Vector arta::math::operator-(const Vector& lhs, const Vector& rhs) {
+arta::linalg::Vector arta::linalg::operator-(const Vector& lhs, const Vector& rhs) {
   Vector vec(std::min(lhs.size(), rhs.size()));
   for (unsigned long i = 0; i < vec.size(); ++i) {
     vec.set(i, lhs.at(i) - rhs.at(i));
   }
   return vec;
 }
-arta::math::Vector arta::math::operator*(const Vector& lhs, const double& rhs) {
+arta::linalg::Vector arta::linalg::operator*(const Vector& lhs, const double& rhs) {
   Vector vec(lhs.size());
   for (unsigned long i = 0; i < vec.size(); ++i) {
     vec.set(i, lhs.at(i) * rhs);
@@ -78,7 +78,7 @@ arta::math::Vector arta::math::operator*(const Vector& lhs, const double& rhs) {
   return vec;
 }
 
-double arta::math::dot(const Vector& lhs, const Vector& rhs) {
+double arta::linalg::dot(const Vector& lhs, const Vector& rhs) {
   double val = 0.0;
   for (unsigned long i = 0; i < lhs.size() && i < rhs.size(); ++i) {
     val += (lhs.at(i) * rhs.at(i));
@@ -86,7 +86,7 @@ double arta::math::dot(const Vector& lhs, const Vector& rhs) {
   return val;
 }
 
-double arta::math::norm(const Vector& lhs) {
+double arta::linalg::norm(const Vector& lhs) {
   double val = 0.0;
   for (unsigned long i = 0; i < lhs.size(); ++i) {
     val += (lhs.at(i) * lhs.at(i));

@@ -8,7 +8,7 @@
 
 #include <iostream>
 
-bool arta::math::diag_dominant(const Matrix& A) {
+bool arta::linalg::diag_dominant(const Matrix& A) {
   for (unsigned i = 0; i < A.size(); ++i) {
     double sum = 0.0;
     for (unsigned j = 0; j < A.size(); ++j) {
@@ -20,8 +20,9 @@ bool arta::math::diag_dominant(const Matrix& A) {
   return true;
 }
 
-arta::math::Vector arta::math::gauss_seidel(const Matrix& A, const Vector& b,
-                                            const unsigned& n) {
+arta::linalg::Vector arta::linalg::gauss_seidel(const Matrix& A,
+                                                const Vector& b,
+                                                const unsigned& n) {
   Vector x(b.size());
   for (unsigned k = 0; k < n; ++k) {
     for (unsigned i = 0; i < b.size(); ++i) {
@@ -37,9 +38,9 @@ arta::math::Vector arta::math::gauss_seidel(const Matrix& A, const Vector& b,
   return x;
 }
 
-arta::math::Vector arta::math::conjugate_gradient(const Matrix& A,
-                                                  const Vector& b,
-                                                  const unsigned& n) {
+arta::linalg::Vector arta::linalg::conjugate_gradient(const Matrix& A,
+                                                      const Vector& b,
+                                                      const unsigned& n) {
   Vector x(b.size());
   Vector r = b - A * x;
   Vector p = r;
@@ -59,8 +60,8 @@ arta::math::Vector arta::math::conjugate_gradient(const Matrix& A,
   return x;
 }
 
-arta::math::Vector arta::math::solve(const Matrix& A, const Vector& b,
-                                     const unsigned& n) {
+arta::linalg::Vector arta::linalg::solve(const Matrix& A, const Vector& b,
+                                         const unsigned& n) {
   // return conjugate_gradient(A, b, n);
   return gauss_seidel(A, b, n);
 }

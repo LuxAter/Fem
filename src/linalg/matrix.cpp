@@ -9,20 +9,20 @@
 #include "../print.hpp"
 #include "vector.hpp"
 
-arta::math::Matrix::Matrix() : size_(0) {}
-arta::math::Matrix::Matrix(unsigned long n) : size_(n), row_ptr_(n + 1, 0) {}
-arta::math::Matrix::Matrix(unsigned long n, const double& v)
+arta::linalg::Matrix::Matrix() : size_(0) {}
+arta::linalg::Matrix::Matrix(unsigned long n) : size_(n), row_ptr_(n + 1, 0) {}
+arta::linalg::Matrix::Matrix(unsigned long n, const double& v)
     : size_(n), row_ptr_(n + 1, 0) {
   for (unsigned long i = 0; i < size_; ++i) {
     set(i, i, v);
   }
 }
-arta::math::Matrix::Matrix(const Matrix& copy)
+arta::linalg::Matrix::Matrix(const Matrix& copy)
     : size_(copy.size_),
       row_ptr_(copy.row_ptr_),
       col_ind_(copy.col_ind_),
       vals_(copy.vals_) {}
-double& arta::math::Matrix::operator()(unsigned long r, unsigned long c) {
+double& arta::linalg::Matrix::operator()(unsigned long r, unsigned long c) {
   if (row_ptr_[r + 1] - row_ptr_[r] == 0) {
     vals_.insert(vals_.begin() + row_ptr_[r + 1], 0.0);
     col_ind_.insert(col_ind_.begin() + row_ptr_[r], c);
@@ -44,7 +44,7 @@ double& arta::math::Matrix::operator()(unsigned long r, unsigned long c) {
     return vals_[row_ptr_[r + 1] - 1];
   }
 }
-double arta::math::Matrix::operator()(unsigned long r, unsigned long c) const {
+double arta::linalg::Matrix::operator()(unsigned long r, unsigned long c) const {
   if (row_ptr_[r + 1] - row_ptr_[r] == 0) {
     return 0.0;
   } else {
@@ -56,7 +56,7 @@ double arta::math::Matrix::operator()(unsigned long r, unsigned long c) const {
     return 0.0;
   }
 }
-double arta::math::Matrix::at(unsigned long r, unsigned long c) const {
+double arta::linalg::Matrix::at(unsigned long r, unsigned long c) const {
   if (row_ptr_[r + 1] - row_ptr_[r] == 0) {
     return 0.0;
   } else {
@@ -68,7 +68,7 @@ double arta::math::Matrix::at(unsigned long r, unsigned long c) const {
     return 0.0;
   }
 }
-void arta::math::Matrix::set(unsigned long r, unsigned long c,
+void arta::linalg::Matrix::set(unsigned long r, unsigned long c,
                              const double& val) {
   if (row_ptr_[r + 1] - row_ptr_[r] == 0) {
     if (val != 0) {
@@ -103,13 +103,13 @@ void arta::math::Matrix::set(unsigned long r, unsigned long c,
     return;
   }
 }
-void arta::math::Matrix::clear() {
+void arta::linalg::Matrix::clear() {
   row_ptr_ = std::vector<unsigned long>(size_ + 1, 0);
   col_ind_.clear();
   vals_.clear();
 }
 
-std::string arta::math::Matrix::dump() const {
+std::string arta::linalg::Matrix::dump() const {
   std::string str;
   for (int r = 0; r < size_; ++r) {
     for (int c = 0; c < size_; ++c) {
@@ -125,7 +125,7 @@ std::string arta::math::Matrix::dump() const {
   return str;
 }
 
-arta::math::Vector arta::math::operator*(const Matrix& lhs, const Vector& rhs) {
+arta::linalg::Vector arta::linalg::operator*(const Matrix& lhs, const Vector& rhs) {
   Vector res(lhs.size());
   for (unsigned long r = 0; r < lhs.size(); ++r) {
     double sum = 0.0;
@@ -137,7 +137,7 @@ arta::math::Vector arta::math::operator*(const Matrix& lhs, const Vector& rhs) {
   return res;
 }
 
-void arta::math::save_mat_to_file(const std::string& file_name,
+void arta::linalg::save_mat_to_file(const std::string& file_name,
                                   const Matrix& mat) {
   FILE* out = fopen(file_name.c_str(), "w");
   if (!out) {
@@ -162,7 +162,7 @@ void arta::math::save_mat_to_file(const std::string& file_name,
   fclose(out);
 }
 
-arta::math::Matrix arta::math::load_mat_from_file(
+arta::linalg::Matrix arta::linalg::load_mat_from_file(
     const std::string& file_name) {
   FILE* src = fopen(file_name.c_str(), "r");
   if (!src) {

@@ -7,7 +7,7 @@
 #include "vector.hpp"
 
 namespace arta {
-namespace math {
+namespace linalg {
   class Matrix {
    public:
     Matrix();
@@ -44,7 +44,7 @@ namespace math {
 
   void save_mat_to_file(const std::string& file_name, const Matrix& mat);
   Matrix load_mat_from_file(const std::string& file_name);
-}  // namespace math
+}  // namespace linalg
 }  // namespace arta
 
 #endif  // ARTA_MATH_MATRIX_HPP_

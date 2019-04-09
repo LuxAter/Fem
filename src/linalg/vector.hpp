@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace arta {
-namespace math {
+namespace linalg {
   class Vector {
    public:
     Vector();
@@ -54,7 +54,7 @@ namespace math {
 
   double dot(const Vector& lhs, const Vector& rhs);
   double norm(const Vector& lhs);
-}  // namespace math
+}  // namespace linalg
 }  // namespace arta
 
 #endif  // ARTA_MATH_VECTOR_HPP_

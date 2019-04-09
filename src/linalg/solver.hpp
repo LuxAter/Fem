@@ -5,14 +5,14 @@
 #include "vector.hpp"
 
 namespace arta {
-namespace math {
+namespace linalg {
   bool diag_dominant(const Matrix& A);
   Vector gauss_seidel(const Matrix& A, const Vector& b,
                       const unsigned& n = 100);
   Vector conjugate_gradient(const Matrix& A, const Vector& b,
                             const unsigned& n = 100);
   Vector solve(const Matrix& A, const Vector& b, const unsigned& n = 100);
-}  // namespace math
+}  // namespace linalg
 }  // namespace arta
 
 #endif  // ARTA_LINALG_SOLVER_HPP_

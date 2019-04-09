@@ -25,11 +25,15 @@ namespace script {
     inline bool valid() const { return valid_check_.use_count() != 0; }
 
     template <typename _T>
-      _T get(const std::string& var);
+    _T get(const std::string& var);
 
-    double initial(const Point& pt);
-    double forcing(const Point& pt, );
+    double initial(const linalg::Pair<double>& pt);
+    double forcing(const linalg::Pair<double>& pt);
+    double forcing(const linalg::Pair<double>& pt, const double* t);
+    double forcing(const linalg::Pair<double>& pt, const linalg::Vector& u,
+                   const double* t);
 
+    bool has(const std::string& var);
 
    private:
     std::shared_ptr<int> valid_check_;
