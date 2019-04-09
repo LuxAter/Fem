@@ -8,6 +8,7 @@ int main(int argc, char *argv[])
   arta::argparse::Parser parser;
   parser.add_flag('v', "verbose", "Enables verbose output");
   parser.add_flag('t', "time", "Enables timing of execution");
+  parser.add_option('r', "res", "100", "Resolution of output images");
   auto args = parser.parse_args(argc, argv);
   for(auto& flg : args.flags){
     std::cout << flg.first << ":" << flg.second << "\n";

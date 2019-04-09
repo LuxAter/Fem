@@ -61,7 +61,55 @@ void arta::argparse::Parser::add_option(const std::vector<std::string>& names,
   options_.push_back({{longest, default_val, help}});
 }
 
-void arta::argparse::Parser::display_help() { exit(0); }
+void arta::argparse::Parser::display_help() {
+  std::size_t flag_length = 0;
+  for (auto& flag : flags_) {
+    std::size_t len = 0;
+    for (auto& it : name_map_) {
+      if (it.second == flag[0]) {
+        len += it.first.length() + 2;
+      }
+    }
+    flag_length = std::max(flag_length, len);
+  }
+  std::size_t opt_length = 0;
+  for (auto& opt : options_) {
+    std::size_t len = 0;
+    for (auto& it : name_map_) {
+      if (it.second == opt[0]) {
+        len += it.second.length() + 2;
+      }
+    }
+    opt_length = std::max(opt_length, len);
+  }
+  printf("FLAGS:\n");
+  for (auto& flag : flags_) {
+    std::string flag_str = "  ";
+    for (auto& it : name_map_) {
+      if (it.second == flag[0]) {
+        flag_str += it.first + ", ";
+      }
+    }
+    flag_str.pop_back();
+    flag_str.pop_back();
+    flag_str += std::string(flag_length - flag_str.length() + 2, ' ');
+    printf("%s  %s\n", flag_str.c_str(), flag[1].c_str());
+  }
+  printf("OPTIONS:\n");
+  for (auto& opt : options_) {
+    std::string opt_str = "  ";
+    for (auto& it : name_map_) {
+      if (it.second == opt[0]) {
+        opt_str += it.first + ", ";
+      }
+    }
+    opt_str.pop_back();
+    opt_str.pop_back();
+    opt_str += std::string(opt_length - opt_str.length() + 2, ' ');
+    printf("%s  %s[%s]\n", opt_str.c_str(), opt[2].c_str(), opt[1].c_str());
+  }
+  exit(0);
+}
 
 arta::argparse::Arguments arta::argparse::Parser::parse_args(int argc,
                                                              char* argv[]) {
@@ -102,7 +150,8 @@ arta::argparse::Arguments arta::argparse::Parser::parse_args(int argc,
             args.options[it->second] = val;
           } else {
             i++;
-            args.options[it->second] = (i < sargv.size()) ? sargv[i - 1] : "";
+            args.options[it->second] =
+                (i - 1 < sargv.size()) ? sargv[i - 1] : "";
           }
           break;
         }
