@@ -17,31 +17,10 @@ extern "C" {
 
 namespace arta {
 namespace script {
-  class Script {
-   public:
-    Script();
-    explicit Script(const std::string& file);
-
-    inline bool valid() const { return valid_check_.use_count() != 0; }
-
-    template <typename _T>
-    _T get(const std::string& var);
-
-    double initial(const linalg::Pair<double>& pt);
-    double forcing(const linalg::Pair<double>& pt);
-    double forcing(const linalg::Pair<double>& pt, const double* t);
-    double forcing(const linalg::Pair<double>& pt, const linalg::Vector& u,
-                   const double* t);
-
-    bool has(const std::string& var);
-
-   private:
-    std::shared_ptr<int> valid_check_;
-    lua_State* state_;
-
-    std::string file_name_;
-    std::function<void(std::string, std::string)> _error_;
-  };
+  void load_script(const std::string& file);
+  void close_script();
+  bool valid();
+  bool has(const std::string& var);
 }  // namespace script
 }  // namespace arta
 

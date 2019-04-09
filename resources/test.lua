@@ -13,6 +13,10 @@ function solution(x, y, t)
   return math.pow(x, 3.0) - 3.0 * x * math.pow(y, 2.0)
 end
 
+function soln(x, y, t)
+  return 1.0
+end
+
 boundary_conditions = {}
 boundary_conditions[0] = solution
 

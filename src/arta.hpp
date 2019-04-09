@@ -5,6 +5,8 @@
 #define ARTA_VERSION_MINOR 2
 
 #include "logger.hpp"
+#include "script.hpp"
+#include "argparse.hpp"
 
 namespace arta {
   void get_version(int& major, int& minor);
