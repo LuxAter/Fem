@@ -24,7 +24,7 @@ void arta::script::load_script(const std::string& file) {
   if (luaL_loadfile(state_, file.c_str()) || lua_pcall(state_, 0, 0, 0)) {
     state_ = NULL;
     log::error("Failed to load script file \"%s\"", file.c_str());
-  }else{
+  } else {
     file_name_ = file;
     log::success("Loaded script file \"%s\"", file.c_str());
   }
@@ -35,7 +35,7 @@ void arta::script::close_script() {
     lua_close(state_);
     state_ = NULL;
     log::success("Closed script file \"%s\"", file_name_.c_str());
-  }else{
+  } else {
     log::warning("Failed to close script file \"%s\"", file_name_.c_str());
   }
 }
@@ -48,3 +48,5 @@ bool arta::script::has(const std::string& var) {
   lua_pop(state_, -1);
   return res;
 }
+
+std::string arta::script::get_file_name() { return file_name_; }
