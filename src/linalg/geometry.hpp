@@ -10,6 +10,7 @@ namespace linalg {
   template <typename _T>
   struct Pair {
     Pair() : x(), y() {}
+    Pair(const _T& a, const _T& b) : x(a), y(b) {}
     template <typename _U>
     Pair(const std::vector<_U>& vec) : x(vec[0]), y(vec[1]) {}
     template <typename _U>
@@ -24,6 +25,7 @@ namespace linalg {
   template <typename _T>
   struct Triple {
     Triple() : x(), y(), z() {}
+    Triple(const _T& a, const _T& b, const _T& c) : x(a), y(b), z(c) {}
     template <typename _U>
     Triple(const std::vector<_U>& vec) : x(vec[0]), y(vec[1]), z(vec[2]) {}
     template <typename _U>

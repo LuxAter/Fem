@@ -21,6 +21,10 @@ namespace script {
   void close_script();
   bool valid();
   bool has(const std::string& var);
+  
+  std::string gets(const std::string& var);
+  double getd(const std::string& var);
+
   std::string get_file_name();
 }  // namespace script
 }  // namespace arta

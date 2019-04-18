@@ -49,4 +49,24 @@ bool arta::script::has(const std::string& var) {
   return res;
 }
 
+std::string arta::script::gets(const std::string& var) {
+  std::string res = std::string();
+  lua_getglobal(state_, var.c_str());
+  if (lua_isstring(state_, -1)) {
+    res = std::string(lua_tostring(state_, -1));
+  }
+  lua_pop(state_, 1);
+  return res;
+}
+
+double arta::script::getd(const std::string& var) {
+  double res = double();
+  lua_getglobal(state_, var.c_str());
+  if (lua_isnumber(state_, -1)) {
+    res = static_cast<double>(lua_tonumber(state_, -1));
+  }
+  lua_pop(state_, 1);
+  return res;
+}
+
 std::string arta::script::get_file_name() { return file_name_; }

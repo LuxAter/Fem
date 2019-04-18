@@ -9,6 +9,85 @@
 #include "logger.hpp"
 #include "script.hpp"
 
+arta::mesh::Mesh::Mesh() {}
+arta::mesh::Mesh::Mesh(const std::string& base_name) {
+  FILE* input = fopen((base_name + ".node").c_str(), "r");
+  if (!input) {
+    log::error("Failed to open \"%s.node\"", base_name.c_str());
+    return;
+  }
+  long n, a, b, c;
+  fscanf(input, "%ld %ld %ld %ld", &n, &a, &b, &c);
+  for (long i = 0; i < n; ++i) {
+    double x, y;
+    fscanf(input, "%ld %lf %lf %ld", &a, &x, &y, &c);
+    pts.push_back({x, y});
+    bounds[0] = std::min(bounds[0], x);
+    bounds[1] = std::min(bounds[1], y);
+    bounds[2] = std::max(bounds[2], x);
+    bounds[3] = std::max(bounds[3], y);
+    bdry_index.push_back(c);
+  }
+  fclose(input);
+
+  input = fopen((base_name + ".ele").c_str(), "r");
+  if (!input) {
+    log::error("Failed to open \"%s.ele\"", base_name.c_str());
+    return;
+  }
+  fscanf(input, "%ld %ld %ld", &n, &a, &b);
+  for (long i = 0; i < n; ++i) {
+    long x, y, z;
+    fscanf(input, "%ld %ld %ld %ld", &a, &x, &y, &z);
+    tri.push_back({x, y, z});
+  }
+  fclose(input);
+
+  input = fopen((base_name + ".neigh").c_str(), "r");
+  if (!input) {
+    log::error("Failed to open \"%s.neigh\"", base_name.c_str());
+    return;
+  }
+  fscanf(input, "%ld %ld", &n, &a);
+  for (long i = 0; i < n; ++i) {
+    long x, y, z;
+    fscanf(input, "%ld %ld %ld %ld", &a, &x, &y, &z);
+    adj.push_back({x, y, z});
+  }
+  fclose(input);
+
+  input = fopen((base_name + ".poly").c_str(), "r");
+  if (!input) {
+    log::error("Failed to open \"%s.poly\"", base_name.c_str());
+    return;
+  }
+  fscanf(input, "%ld %ld %ld %ld", &n, &a, &b, &c);
+  for (long i = 0; i < n; ++i) {
+    double x, y;
+    fscanf(input, "%ld %lf %lf %ld", &a, &x, &y, &b);
+  }
+  fscanf(input, "%ld %ld", &n, &a);
+  for (long i = 0; i < n; ++i) {
+    long d;
+    fscanf(input, "%ld %ld %ld %ld", &a, &b, &c, &d);
+  }
+  fscanf(input, "%ld", &n);
+  if (n != 0) {
+    has_holes_ = true;
+  } else {
+    has_holes_ = false;
+  }
+  fclose(input);
+}
+
+arta::mesh::Mesh::Mesh(const Mesh& copy)
+    : pts(copy.pts),
+      bdry_index(copy.bdry_index),
+      tri(copy.tri),
+      adj(copy.adj),
+      bounds(copy.bounds),
+      has_holes_(copy.has_holes_) {}
+
 void arta::mesh::construct_mesh(const std::string& source,
                                 const std::string& dest, const double& area,
                                 const double& angle) {
