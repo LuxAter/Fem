@@ -18,7 +18,6 @@ function soln(x, y, t)
 end
 
 boundary_conditions = {}
--- boundary_conditions[0] = solution
 
 function forcing(x, y, t, u)
   return -(6.0 * (A[1][1] * x - A[1][2] * y - A[2][1] * y - A[2][2] * x) +

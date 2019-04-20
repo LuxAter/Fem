@@ -6,6 +6,7 @@
 #include "script.hpp"
 #include "mesh.hpp"
 #include "argparse.hpp"
+#include "calc.hpp"
 
 namespace arta {
 class PDE {
