@@ -14,6 +14,10 @@ namespace mesh {
     explicit Mesh(const std::string& base_name);
     Mesh(const Mesh& copy);
 
+    double grain_size(const unsigned& e) const;
+
+    int locate(const double& x, const double& y) const;
+    bool is_boundary(const unsigned& e) const;
 
     std::vector<linalg::Pair<double>> pts;
     std::vector<unsigned long> bdry_index;

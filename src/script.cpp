@@ -49,6 +49,138 @@ bool arta::script::has(const std::string& var) {
   return res;
 }
 
+double arta::script::A(const double& x, const double& y, const unsigned& i,
+                       const unsigned& j) {
+  lua_getglobal(state_, "A");
+  double val = 0.0;
+  if (!lua_isnil(state_, -1) && lua_istable(state_, -1)) {
+    lua_pushnil(state_);
+    unsigned r = 0;
+    while (lua_next(state_, -2)) {
+      if (r == i && lua_istable(state_, -1)) {
+        lua_pushnil(state_);
+        unsigned c = 0;
+        while (lua_next(state_, -2)) {
+          if (c == j) {
+            if (lua_isfunction(state_, -1)) {
+              lua_pushnumber(state_, x);
+              lua_pushnumber(state_, y);
+              lua_call(state_, 2, 1);
+              val = lua_tonumber(state_, -1);
+            } else if (lua_isnumber(state_, -1)) {
+              val = lua_tonumber(state_, -1);
+            }
+          }
+          lua_pop(state_, 1);
+        }
+      }
+      lua_pop(state_, 1);
+    }
+    int n = lua_gettop(state_);
+    lua_pop(state_, n);
+  }
+  return val;
+}
+double arta::script::B(const double& x, const double& y, const unsigned& i) {
+  lua_getglobal(state_, "B");
+  double val = 0.0;
+  if (!lua_isnil(state_, -1)) {
+    if (lua_istable(state_, -1)) {
+      lua_pushnil(state_);
+      unsigned index = 0;
+      while (lua_next(state_, -2)) {
+        if (index == i) {
+          if (lua_isfunction(state_, -1)) {
+            lua_pushnumber(state_, x);
+            lua_pushnumber(state_, y);
+            lua_call(state_, 2, 1);
+            val = lua_tonumber(state_, -1);
+          } else if (lua_isnumber(state_, -1)) {
+            val = lua_tonumber(state_, -1);
+          }
+        }
+        lua_pop(state_, 1);
+      }
+      int n = lua_gettop(state_);
+      lua_pop(state_, n);
+    }
+  }
+  return val;
+}
+double arta::script::C(const double& x, const double& y) {
+  lua_getglobal(state_, "C");
+  double val = 0.0;
+  if (!lua_isnil(state_, -1)) {
+    if (lua_isfunction(state_, -1)) {
+      lua_pushnumber(state_, x);
+      lua_pushnumber(state_, y);
+      lua_call(state_, 2, 1);
+      val = lua_tonumber(state_, -1);
+    } else if (lua_isnumber(state_, -1)) {
+      val = lua_tonumber(state_, -1);
+    }
+  }
+  lua_pop(state_, -1);
+  return val;
+}
+double arta::script::forcing(const double& x, const double& y,
+                             const double& t) {
+  const char* alias[] = {"f", "force", "forcing"};
+  for (unsigned i = 0; i < 3; ++i) {
+    lua_getglobal(state_, alias[i]);
+    if (!lua_isnil(state_, -1)) break;
+  }
+  if (lua_isnil(state_, -1)) return 0.0;
+  lua_pushnumber(state_, x);
+  lua_pushnumber(state_, y);
+  lua_pushnumber(state_, t);
+  lua_call(state_, 3, 1);
+  double val = lua_tonumber(state_, -1);
+  lua_pop(state_, -1);
+  return val;
+}
+
+double arta::script::boundary(const unsigned& i, const double& x,
+                              const double& y, const double& t) {
+  double val = 0.0;
+  const char* alias[] = {"bdry", "bndry", "boundary"};
+  for (unsigned i = 0; i < 3; ++i) {
+    lua_getglobal(state_, alias[i]);
+    if (!lua_isnil(state_, -1)) break;
+  }
+  if (lua_isnil(state_, -1) || !lua_istable(state_, -1)) return 0.0;
+  lua_pushnumber(state_, i);
+  lua_gettable(state_, -2);
+  if (lua_isnil(state_, -1)) {
+    lua_pop(state_, 1);
+    lua_pushnumber(state_, 0);
+    lua_gettable(state_, -2);
+    if (lua_isnil(state_, -1)) {
+      val = 0.0;
+    } else if (lua_isnumber(state_, -1)) {
+      val = lua_tonumber(state_, -1);
+    } else if (lua_isfunction(state_, -1)) {
+      lua_pushnumber(state_, x);
+      lua_pushnumber(state_, y);
+      lua_pushnumber(state_, t);
+      lua_call(state_, 3, 1);
+      val = lua_tonumber(state_, -1);
+    }
+    lua_pop(state_, -1);
+  } else if (lua_isnumber(state_, -1)) {
+    val = lua_tonumber(state_, -1);
+  } else if (lua_isfunction(state_, -1)) {
+    lua_pushnumber(state_, x);
+    lua_pushnumber(state_, y);
+    lua_pushnumber(state_, t);
+    lua_call(state_, 3, 1);
+    val = lua_tonumber(state_, -1);
+  }
+  int n = lua_gettop(state_);
+  lua_pop(state_, n);
+  return val;
+}
+
 std::string arta::script::gets(const std::string& var) {
   std::string res = std::string();
   lua_getglobal(state_, var.c_str());

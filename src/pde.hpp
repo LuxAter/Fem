@@ -3,14 +3,17 @@
 
 #include <string>
 
-#include "script.hpp"
-#include "mesh.hpp"
 #include "argparse.hpp"
 #include "calc.hpp"
+#include "linalg.hpp"
+#include "mesh.hpp"
+#include "script.hpp"
+
+#include <functional>
 
 namespace arta {
 class PDE {
-  public:
+ public:
   PDE();
   explicit PDE(argparse::Arguments args);
   PDE(std::string script_, std::string mesh = "",
@@ -18,6 +21,22 @@ class PDE {
   ~PDE();
 
   void construct_matrices();
+  void construct_forcing(const double& t);
+
+  linalg::Vector solve_time_indep();
+
+  double approx(const double& x, const double& y, const unsigned& e) const;
+
+  std::function<double(double, double)> G(const unsigned& e, const unsigned& i,
+                                          const unsigned& j);
+  std::function<double(double, double)> A(const unsigned& e, const unsigned& i,
+                                          const unsigned& j);
+  std::function<double(double, double)> B(const unsigned& e, const unsigned& i,
+                                          const unsigned& j);
+  std::function<double(double, double)> C(const unsigned& e, const unsigned& i,
+                                          const unsigned& j);
+  std::function<double(double, double)> F(const unsigned& e, const unsigned& i,
+                                          const double& t);
 
   std::string script_source;
   std::string mesh_source;
@@ -25,10 +44,16 @@ class PDE {
 
   std::array<double, 2> mesh_constraints;
 
+  double time_;
+
+  linalg::Matrix G_, M_;
+  linalg::Vector F_, U_;
+
   mesh::Mesh mesh;
 
   bool timer = false;
-  private:
+
+ private:
   void load_script();
   void load_mesh();
 };

@@ -8,6 +8,7 @@
 #include "script.hpp"
 #include "argparse.hpp"
 #include "pde.hpp"
+#include "plot.hpp"
 
 namespace arta {
   void get_version(int& major, int& minor);

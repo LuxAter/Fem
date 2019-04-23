@@ -17,3 +17,15 @@ double arta::calc::derivative(const std::function<double(double, double)>& func,
   }
   return sum / (hx + hy);
 }
+
+double arta::calc::derivative(
+    const std::function<double(double, double, unsigned, unsigned)>& func,
+    const double& x, const double& y, const double& hx, const double& hy,
+    const unsigned& a1, const unsigned& a2) {
+  double sum = 0.0;
+  for (unsigned i = 0; i < 9; ++i) {
+    sum += (weights_[i] * func(x + ((static_cast<int>(i) - 4) * hx),
+                               y + ((static_cast<int>(i) - 4) * hy), a1, a2));
+  }
+  return sum / (hx + hy);
+}

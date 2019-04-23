@@ -19,5 +19,7 @@ int main(int argc, char* argv[]) {
   }
   arta::log::version("ARTA V.%d.%d", ARTA_VERSION_MAJOR, ARTA_VERSION_MINOR);
   arta::PDE pde(args);
+  pde.solve_time_indep();
+  arta::plot("test.bmp", &pde, 500, 500, "parula");
   return 0;
 }

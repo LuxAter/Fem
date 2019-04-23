@@ -1,0 +1,76 @@
+//
+// layout.dot
+//
+// Created on 22-04-2019 by arden
+//
+digraph layout {
+  node [shape=box, nodesep=5.0];
+  splines=ortho;
+  user [label="User"];
+  script [label="Script"];
+  pslg [label="PSLG"];
+  mesh [label="Mesh"];
+  g[label="[G]"];
+  m[label="[M]"];
+  f[label="[F]"];
+
+  user -> script
+  script -> pslg;
+  pslg -> mesh;
+  user -> pslg[style=dashed];
+  mesh -> g;
+  script -> m;
+  mesh -> m;
+  script -> f;
+  mesh -> f;
+
+  subgraph cluster_0 {
+    label="Time Dependent"
+    graph[style=dashed];
+    tdu0[label="[U0]"];
+    tdun[label="[Un]"];
+    tdfn[label="[Fn]"];
+    tdfnp[label="[F(n+1)]"];
+    tddt[label="dt"];
+    tdta[label="~A"];
+    tdtb[label="~B"];
+    tdtcn[label="~Cn"];
+    tdqn[label="Qn"];
+    tdunp[label="[U(n+1)]"];
+    tdp[label="Plot"];
+    tddt -> tdta;
+    tddt -> tdtb;
+    tddt -> tdtcn;
+    tdfn -> tdtcn;
+    tdfnp -> tdtcn;
+    tdtb -> tdqn;
+    tdtcn -> tdqn;
+    tdun -> tdqn;
+    tdta -> tdunp;
+    tdqn -> tdunp;
+    tdu0 -> tdun;
+    tdfnp -> tdfn[style=dotted];
+    tdunp -> tdun[style=dotted];
+    tdunp -> tdp;
+  }
+  g -> tdta;
+  m -> tdta;
+  g -> tdtb;
+  m -> tdtb;
+  script->tdu0;
+  script->tddt;
+  f->tdfn;
+  script -> tdfnp;
+  mesh -> tdfnp;
+
+  subgraph cluster_1 {
+    label="Time Independent"
+    graph[style=dashed];
+
+    tiu[label="[U]"];
+    tip[label="Plot"];
+    tiu -> tip;
+  }
+  m -> tiu;
+  f -> tiu;
+}

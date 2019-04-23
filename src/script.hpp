@@ -21,7 +21,15 @@ namespace script {
   void close_script();
   bool valid();
   bool has(const std::string& var);
-  
+
+  double A(const double& x, const double& y, const unsigned& i,
+           const unsigned& j);
+  double B(const double& x, const double& y, const unsigned& i);
+  double C(const double& x, const double& y);
+  double forcing(const double& x, const double& y, const double& t);
+  double boundary(const unsigned& i, const double& x, const double& y,
+                  const double& t);
+
   std::string gets(const std::string& var);
   double getd(const std::string& var);
 

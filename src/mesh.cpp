@@ -1,5 +1,6 @@
 #include "mesh.hpp"
 
+#include <cmath>
 #include <cstdlib>
 #include <string>
 
@@ -51,7 +52,7 @@ arta::mesh::Mesh::Mesh(const std::string& base_name) {
   fscanf(input, "%ld %ld", &n, &a);
   for (long i = 0; i < n; ++i) {
     long x, y, z;
-    fscanf(input, "%ld %ld %ld %ld", &a, &x, &y, &z);
+    fscanf(input, "%ld %ld %ld %ld", &a, &y, &z, &x);
     adj.push_back({x, y, z});
   }
   fclose(input);
@@ -87,6 +88,57 @@ arta::mesh::Mesh::Mesh(const Mesh& copy)
       adj(copy.adj),
       bounds(copy.bounds),
       has_holes_(copy.has_holes_) {}
+
+double arta::mesh::Mesh::grain_size(const unsigned& e) const {
+  double x1 = pts[tri[e][0]].x, y1 = pts[tri[e][0]].y;
+  double x2 = pts[tri[e][1]].x, y2 = pts[tri[e][1]].y;
+  double x3 = pts[tri[e][2]].x, y3 = pts[tri[e][2]].y;
+  return fabs((x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)) / 2.0) / 8;
+}
+
+int arta::mesh::Mesh::locate(const double& x, const double& y) const {
+  if (has_holes_ == false) {
+    int t = tri.size() - 1;
+    bool searching = true;
+    while (searching == true) {
+      bool within = true;
+      for (unsigned long i = 0; i < 3 && within == true; ++i) {
+        unsigned long v1 = tri[t][i];
+        unsigned long v2 = tri[t][(i + 1) % 3];
+        if ((pts[v1].y - y) * (pts[v2].x - x) >
+            (pts[v1].x - x) * (pts[v2].y - y)) {
+          t = adj[t][i];
+          within = false;
+        }
+      }
+      if (within == true || t == -1) {
+        searching = false;
+      }
+    }
+    return t;
+  } else {
+    bool searching = true;
+    for (unsigned long t = 0; t < tri.size() && searching == true; ++t) {
+      bool within = true;
+      for (unsigned long i = 0; i < 3 && within == true; ++i) {
+        unsigned long v1 = tri[t][i];
+        unsigned long v2 = tri[t][(i + 1) % 3];
+        if ((pts[v1].y - y) * (pts[v2].x - x) >
+            (pts[v1].x - x) * (pts[v2].y - y)) {
+          within = false;
+        }
+      }
+      if (within == true) {
+        return t;
+      }
+    }
+    return -1;
+  }
+}
+
+bool arta::mesh::Mesh::is_boundary(const unsigned& e) const {
+  return bdry_index[e] != 0;
+}
 
 void arta::mesh::construct_mesh(const std::string& source,
                                 const std::string& dest, const double& area,
