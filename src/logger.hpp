@@ -198,6 +198,8 @@ namespace log {
     inline void set_body_pad(unsigned val) { padding_[3] = val; }
     inline void set_pad(unsigned id, unsigned val) { padding_[id] = val; }
 
+    virtual void set_color(bool val){}
+
    protected:
     virtual void handle_log(const LogType&, const std::string&) {}
     unsigned activation_mask_ = FATAL | ERROR | WARNING | SUCCESS | DEBUG |
@@ -288,31 +290,44 @@ namespace log {
     void set_color(bool val) {
       if (val) {
         this->log_fmt_ = {
-            {"\033[1;31m[__TYPE__] <__DATE_TIME__> "
-             "(__FILE__:__FUNC__:__LINE__) __BODY__\033[0m",
-             "\033[1;31m[__TYPE__] <__DATE_TIME__> "
-             "(__FILE__:__FUNC__:__LINE__) "
-             "__BODY__\033[0m",
-             "\033[1;33m[__TYPE__] <__DATE_TIME__> "
-             "(__FILE__:__FUNC__:__LINE__) "
-             "__BODY__\033[0m",
-             "\033[1;32m[__TYPE__] <__DATE_TIME__> "
-             "(__FILE__:__FUNC__:__LINE__) "
-             "__BODY__\033[0m",
-             "\033[1;34m[__TYPE__] <__DATE_TIME__> "
-             "(__FILE__:__FUNC__:__LINE__) "
-             "__BODY__\033[0m",
-             "\033[1;35m[__TYPE__] <__DATE_TIME__> "
-             "(__FILE__:__FUNC__:__LINE__) "
-             "__BODY__\033[0m",
-             "\033[1;37m[__TYPE__] <__DATE_TIME__> "
-             "(__FILE__:__FUNC__:__LINE__) "
-             "__BODY__\033[0m",
-             "\033[1;36m[__TYPE__] <__DATE_TIME__> "
-             "(__FILE__:__FUNC__:__LINE__) "
-             "__BODY__\033[0m",
-             "\033[1;33m[__TYPE__] <__DATE_TIME__> "
-             "(__FILE__:__FUNC__:__LINE__) __BODY__\033[0m"}};
+          {
+            "\033[1;31m" + this->log_fmt_[0] + "\033[0m",
+            "\033[1;31m" + this->log_fmt_[1] + "\033[0m",
+            "\033[1;33m" + this->log_fmt_[2] + "\033[0m",
+            "\033[1;32m" + this->log_fmt_[3] + "\033[0m",
+            "\033[1;34m" + this->log_fmt_[4] + "\033[0m",
+            "\033[1;35m" + this->log_fmt_[5] + "\033[0m",
+            "\033[1;37m" + this->log_fmt_[6] + "\033[0m",
+            "\033[1;36m" + this->log_fmt_[7] + "\033[0m",
+            "\033[1;33m" + this->log_fmt_[8] + "\033[0m",
+          }
+        };
+        // this->log_fmt_ = {
+        //     {"\033[1;31m[__TYPE__] <__DATE_TIME__> "
+        //      "(__FILE__:__FUNC__:__LINE__) __BODY__\033[0m",
+        //      "\033[1;31m[__TYPE__] <__DATE_TIME__> "
+        //      "(__FILE__:__FUNC__:__LINE__) "
+        //      "__BODY__\033[0m",
+        //      "\033[1;33m[__TYPE__] <__DATE_TIME__> "
+        //      "(__FILE__:__FUNC__:__LINE__) "
+        //      "__BODY__\033[0m",
+        //      "\033[1;32m[__TYPE__] <__DATE_TIME__> "
+        //      "(__FILE__:__FUNC__:__LINE__) "
+        //      "__BODY__\033[0m",
+        //      "\033[1;34m[__TYPE__] <__DATE_TIME__> "
+        //      "(__FILE__:__FUNC__:__LINE__) "
+        //      "__BODY__\033[0m",
+        //      "\033[1;35m[__TYPE__] <__DATE_TIME__> "
+        //      "(__FILE__:__FUNC__:__LINE__) "
+        //      "__BODY__\033[0m",
+        //      "\033[1;37m[__TYPE__] <__DATE_TIME__> "
+        //      "(__FILE__:__FUNC__:__LINE__) "
+        //      "__BODY__\033[0m",
+        //      "\033[1;36m[__TYPE__] <__DATE_TIME__> "
+        //      "(__FILE__:__FUNC__:__LINE__) "
+        //      "__BODY__\033[0m",
+        //      "\033[1;33m[__TYPE__] <__DATE_TIME__> "
+        //      "(__FILE__:__FUNC__:__LINE__) __BODY__\033[0m"}};
       } else {
         this->log_fmt_ = {
             {"[__TYPE__] <__DATE_TIME__> (__FILE__:__FUNC__:__LINE__) "

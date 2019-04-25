@@ -35,6 +35,7 @@ arta::PDE::PDE(std::string script_, std::string mesh_src,
 arta::PDE::~PDE() { script::close_script(); }
 
 void arta::PDE::construct_matrices() {
+  // TODO What the actual F**k is going on here???
   if (timer) {
     time::start();
   }
@@ -43,6 +44,7 @@ void arta::PDE::construct_matrices() {
       access((dest_dir + "M.mat").c_str(), F_OK) != -1) {
     G_ = linalg::load_mat_from_file(dest_dir + "G.mat");
     M_ = linalg::load_mat_from_file(dest_dir + "M.mat");
+    linalg::save_mat_to_file(dest_dir + "Mm.mat", M_);
   } else {
     G_ = linalg::Matrix(mesh.pts.size());
     M_ = linalg::Matrix(mesh.pts.size());
@@ -121,7 +123,7 @@ double arta::PDE::approx(const double& x, const double& y,
                          const unsigned& e) const {
   double val = 0.0;
   for (unsigned i = 0; i < U_.size(); ++i) {
-    val += (U_[i] * basis::global(&mesh, x, y, e, i));
+    val += (U_[i] * basis::global(&mesh, x, y, i, e));
   }
   return val;
 }

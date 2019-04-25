@@ -29,10 +29,13 @@ class PDE {
 
   std::function<double(double, double)> G(const unsigned& e, const unsigned& i,
                                           const unsigned& j);
+  // Add case if A = const
   std::function<double(double, double)> A(const unsigned& e, const unsigned& i,
                                           const unsigned& j);
+  // Add case if B = const
   std::function<double(double, double)> B(const unsigned& e, const unsigned& i,
                                           const unsigned& j);
+  // Add case if C = const
   std::function<double(double, double)> C(const unsigned& e, const unsigned& i,
                                           const unsigned& j);
   std::function<double(double, double)> F(const unsigned& e, const unsigned& i,

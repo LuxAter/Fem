@@ -13,8 +13,12 @@ void plot_grid(const std::string& dest, const unsigned& w, const unsigned& h,
 
 void plot(const std::string& dest, const PDE* pde, const unsigned& w,
           const unsigned& h, std::string cmap);
+void plot_tri(const std::string& dest, const PDE* pde, const unsigned& w,
+              const unsigned& h, std::string cmap);
 
-void write_bmp(const std::string file, uint32_t** buffer, unsigned w,
+void write_bmp(const std::string& file, uint32_t** buffer, unsigned w,
+               unsigned h);
+void write_png(const std::string& file, uint32_t** buffer, unsigned w,
                unsigned h);
 
 double clamp(double val, double in_min, double in_max, double out_min,

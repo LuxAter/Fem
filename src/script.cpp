@@ -54,57 +54,42 @@ double arta::script::A(const double& x, const double& y, const unsigned& i,
   lua_getglobal(state_, "A");
   double val = 0.0;
   if (!lua_isnil(state_, -1) && lua_istable(state_, -1)) {
-    lua_pushnil(state_);
-    unsigned r = 0;
-    while (lua_next(state_, -2)) {
-      if (r == i && lua_istable(state_, -1)) {
-        lua_pushnil(state_);
-        unsigned c = 0;
-        while (lua_next(state_, -2)) {
-          if (c == j) {
-            if (lua_isfunction(state_, -1)) {
-              lua_pushnumber(state_, x);
-              lua_pushnumber(state_, y);
-              lua_call(state_, 2, 1);
-              val = lua_tonumber(state_, -1);
-            } else if (lua_isnumber(state_, -1)) {
-              val = lua_tonumber(state_, -1);
-            }
-          }
-          lua_pop(state_, 1);
-        }
+    lua_pushnumber(state_, i);
+    lua_gettable(state_, -2);
+    if (lua_istable(state_, -1)) {
+      lua_pushnumber(state_, j);
+      lua_gettable(state_, -2);
+      if (lua_isfunction(state_, -1)) {
+        lua_pushnumber(state_, x);
+        lua_pushnumber(state_, y);
+        lua_call(state_, 2, 1);
+        val = lua_tonumber(state_, -1);
+      } else if (lua_isnumber(state_, -1)) {
+        val = lua_tonumber(state_, -1);
       }
-      lua_pop(state_, 1);
     }
-    int n = lua_gettop(state_);
-    lua_pop(state_, n);
   }
+  int n = lua_gettop(state_);
+  lua_pop(state_, n);
   return val;
 }
 double arta::script::B(const double& x, const double& y, const unsigned& i) {
   lua_getglobal(state_, "B");
   double val = 0.0;
-  if (!lua_isnil(state_, -1)) {
-    if (lua_istable(state_, -1)) {
-      lua_pushnil(state_);
-      unsigned index = 0;
-      while (lua_next(state_, -2)) {
-        if (index == i) {
-          if (lua_isfunction(state_, -1)) {
-            lua_pushnumber(state_, x);
-            lua_pushnumber(state_, y);
-            lua_call(state_, 2, 1);
-            val = lua_tonumber(state_, -1);
-          } else if (lua_isnumber(state_, -1)) {
-            val = lua_tonumber(state_, -1);
-          }
-        }
-        lua_pop(state_, 1);
-      }
-      int n = lua_gettop(state_);
-      lua_pop(state_, n);
+  if (!lua_isnil(state_, -1) && lua_istable(state_, -1)) {
+    lua_pushnumber(state_, i);
+    lua_gettable(state_, -2);
+    if (lua_isfunction(state_, -1)) {
+      lua_pushnumber(state_, x);
+      lua_pushnumber(state_, y);
+      lua_call(state_, 2, 1);
+      val = lua_tonumber(state_, -1);
+    } else {
+      val = lua_tonumber(state_, -1);
     }
   }
+  int n = lua_gettop(state_);
+  lua_pop(state_, n);
   return val;
 }
 double arta::script::C(const double& x, const double& y) {

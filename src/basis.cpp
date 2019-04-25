@@ -2,6 +2,8 @@
 
 #include "mesh.hpp"
 
+#include "logger.hpp"
+
 double arta::basis::local(const mesh::Mesh* mesh, const double& x,
                           const double& y, const unsigned& tri,
                           const unsigned& vert) {

@@ -35,7 +35,7 @@ void arta::linalg::save_vec_to_file(const std::string& file_name,
   fprintf(out, "%lu\n", vec.size());
   const std::vector<double>* vals = vec.get_vals();
   for (unsigned long i = 0; i < vals->size(); ++i) {
-    fprintf(out, "%lf ", vals->at(i));
+    fprintf(out, "%0.10lf ", vals->at(i));
   }
   fclose(out);
 }

@@ -157,7 +157,7 @@ void arta::linalg::save_mat_to_file(const std::string& file_name,
   fprintf(out, "\n");
   const std::vector<double>* dv = mat.get_vals();
   for (unsigned long i = 0; i < dv->size(); ++i) {
-    fprintf(out, "%lf ", dv->at(i));
+    fprintf(out, "%0.10lf ", dv->at(i));
   }
   fclose(out);
 }

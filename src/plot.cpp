@@ -8,6 +8,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <png.h>
+
 #include "linalg.hpp"
 #include "logger.hpp"
 #include "mesh.hpp"
@@ -48,6 +50,8 @@ void arta::plot_grid(const std::string& dest, const unsigned& w,
 
   if (dest.find(".bmp") != std::string::npos) {
     write_bmp(dest, buffer, w, h);
+  } else if (dest.find(".png") != std::string::npos) {
+    write_png(dest, buffer, w, h);
   }
 
   for (unsigned i = 0; i < h; ++i) {
@@ -72,7 +76,6 @@ void arta::plot(const std::string& dest, const PDE* pde, const unsigned& w,
         vals.back().push_back(std::numeric_limits<double>::quiet_NaN());
         continue;
       }
-      // vals.back().push_back(t);
       vals.back().push_back(pde->approx(x, y, t));
     }
   }
@@ -86,7 +89,36 @@ void arta::plot(const std::string& dest, const PDE* pde, const unsigned& w,
   }
 }
 
-void arta::write_bmp(const std::string file, uint32_t** buffer, unsigned w,
+void arta::plot_tri(const std::string& dest, const PDE* pde, const unsigned& w,
+                    const unsigned& h, std::string cmap) {
+  if (pde->timer) {
+    time::start();
+  }
+  std::vector<std::vector<double>> vals;
+  double stepx = (pde->mesh.bounds[2] - pde->mesh.bounds[0]) / w;
+  double stepy = (pde->mesh.bounds[3] - pde->mesh.bounds[1]) / h;
+  for (double y = pde->mesh.bounds[1]; y < pde->mesh.bounds[3]; y += stepy) {
+    vals.push_back(std::vector<double>());
+    for (double x = pde->mesh.bounds[0]; x < pde->mesh.bounds[2]; x += stepx) {
+      int t = pde->mesh.locate(x, y);
+      if (t < 0) {
+        vals.back().push_back(std::numeric_limits<double>::quiet_NaN());
+        continue;
+      }
+      vals.back().push_back(t);
+    }
+  }
+  if (pde->timer) {
+    log::status("Evaluated Tris: %f", time::stop());
+    time::start();
+  }
+  plot_grid(dest, w, h, vals, cmap);
+  if (pde->timer) {
+    log::status("Plot Tris: %f", time::stop());
+  }
+}
+
+void arta::write_bmp(const std::string& file, uint32_t** buffer, unsigned w,
                      unsigned h) {
   unsigned file_size = 54 + 3 * w * h;
 
@@ -98,9 +130,9 @@ void arta::write_bmp(const std::string file, uint32_t** buffer, unsigned w,
   for (unsigned x = 0; x < w; ++x) {
     for (unsigned y = 0; y < h; ++y) {
       unsigned x_ind = x, y_ind = (h - 1) - y;
-      uint8_t r = ((buffer[y][x] >> 16) & 0XFF);
-      uint8_t g = ((buffer[y][x] >> 8) & 0XFF);
-      uint8_t b = ((buffer[y][x]) & 0XFF);
+      uint8_t r = ((buffer[h - y - 1][x] >> 16) & 0XFF);
+      uint8_t g = ((buffer[h - y - 1][x] >> 8) & 0XFF);
+      uint8_t b = ((buffer[h - y - 1][x]) & 0XFF);
       byte_data[(x_ind + y_ind * w) * 3 + 0] = b;
       byte_data[(x_ind + y_ind * w) * 3 + 1] = g;
       byte_data[(x_ind + y_ind * w) * 3 + 2] = r;
@@ -139,6 +171,53 @@ void arta::write_bmp(const std::string file, uint32_t** buffer, unsigned w,
     fwrite(pad, 1, (4 - (w * 3) % 4) % 4, out);
   }
   free(byte_data);
+  fclose(out);
+}
+
+void arta::write_png(const std::string& file, uint32_t** buffer, unsigned w,
+                     unsigned h) {
+  FILE* out = fopen(file.c_str(), "wb");
+  if (out == NULL) {
+    return;
+  }
+  png_structp png =
+      png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  if (!png) {
+    fclose(out);
+    return;
+  }
+  png_infop info = png_create_info_struct(png);
+  if (!info) {
+    fclose(out);
+    return;
+  }
+  if (setjmp(png_jmpbuf(png))) {
+    fclose(out);
+    return;
+  }
+  uint8_t** byte_data = (uint8_t**)std::malloc(h * sizeof(uint8_t*));
+  for (unsigned i = 0; i < h; ++i) {
+    byte_data[i] = (uint8_t*)std::malloc(3 * w * sizeof(uint8_t));
+  }
+  for (unsigned x = 0; x < w; ++x) {
+    for (unsigned y = 0; y < h; ++y) {
+      uint8_t r = ((buffer[h - y - 1][x] >> 16) & 0XFF);
+      uint8_t g = ((buffer[h - y - 1][x] >> 8) & 0XFF);
+      uint8_t b = ((buffer[h - y - 1][x]) & 0XFF);
+      unsigned id = 3 * x;
+      byte_data[y][id + 0] = r;
+      byte_data[y][id + 1] = g;
+      byte_data[y][id + 2] = b;
+    }
+  }
+  png_init_io(png, out);
+  png_set_IHDR(png, info, w, h, 8, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
+               PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+  png_write_info(png, info);
+  png_write_image(png, byte_data);
+  png_write_end(png, NULL);
+  png_free_data(png, info, PNG_FREE_ALL, -1);
+  png_destroy_write_struct(&png, (png_infopp)NULL);
   fclose(out);
 }
 
