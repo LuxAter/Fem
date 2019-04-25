@@ -14,6 +14,7 @@ int main(int argc, char* argv[]) {
   parser.add_option('a', "mesh-area", "-1", "Mesh maximum triangle area");
   parser.add_option('q', "mesh-angle", "-1", "Mesh minimum triangle angle");
   parser.add_option('c', "cmap", "parula", "Plot color map basis");
+  parser.add_option('b', "bg", "0xFFFFFF", "Plot background color");
   auto args = parser.parse_args(argc, argv);
   std::vector<double> times;
   if (!args.flags["verbose"]) {
@@ -26,8 +27,8 @@ int main(int argc, char* argv[]) {
   arta::PDE pde(args);
   pde.solve_time_indep();
   arta::plot(pde.dest_dir + "approx.png", &pde, args.geti("res"),
-             args.geti("res"), args.options["cmap"]);
+             args.geti("res"), args.options["cmap"], args.geth("bg"));
   arta::plot_tri(pde.dest_dir + "tri.png", &pde, args.geti("res"),
-                 args.geti("res"), args.options["cmap"]);
+                 args.geti("res"), args.options["cmap"], args.geth("bg"));
   return 0;
 }

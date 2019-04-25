@@ -20,7 +20,7 @@
 void arta::plot_grid(const std::string& dest, const unsigned& w,
                      const unsigned& h,
                      const std::vector<std::vector<double>>& vals,
-                     std::string cmap) {
+                     std::string cmap, uint32_t bg) {
   std::array<unsigned, 256> color_map = _cmaps[cmap];
   uint32_t** buffer = (uint32_t**)malloc(h * sizeof(uint32_t*));
   for (unsigned i = 0; i < h; ++i) {
@@ -40,7 +40,7 @@ void arta::plot_grid(const std::string& dest, const unsigned& w,
   for (unsigned i = 0; i < h; ++i) {
     for (unsigned j = 0; j < w; ++j) {
       if (std::isnan(vals[i][j])) {
-        buffer[i][j] = 0xFFFFFF;
+        buffer[i][j] = bg;
         continue;
       }
       buffer[i][j] = color_map[static_cast<unsigned>(
@@ -61,7 +61,7 @@ void arta::plot_grid(const std::string& dest, const unsigned& w,
 }
 
 void arta::plot(const std::string& dest, const PDE* pde, const unsigned& w,
-                const unsigned& h, std::string cmap) {
+                const unsigned& h, std::string cmap, uint32_t bg) {
   if (pde->timer) {
     time::start();
   }
@@ -83,14 +83,14 @@ void arta::plot(const std::string& dest, const PDE* pde, const unsigned& w,
     log::status("Evaluated Approximation: %f", time::stop());
     time::start();
   }
-  plot_grid(dest, w, h, vals, cmap);
+  plot_grid(dest, w, h, vals, cmap, bg);
   if (pde->timer) {
     log::status("Plot Approximation: %f", time::stop());
   }
 }
 
 void arta::plot_tri(const std::string& dest, const PDE* pde, const unsigned& w,
-                    const unsigned& h, std::string cmap) {
+                    const unsigned& h, std::string cmap, uint32_t bg) {
   if (pde->timer) {
     time::start();
   }
@@ -112,7 +112,7 @@ void arta::plot_tri(const std::string& dest, const PDE* pde, const unsigned& w,
     log::status("Evaluated Tris: %f", time::stop());
     time::start();
   }
-  plot_grid(dest, w, h, vals, cmap);
+  plot_grid(dest, w, h, vals, cmap, bg);
   if (pde->timer) {
     log::status("Plot Tris: %f", time::stop());
   }

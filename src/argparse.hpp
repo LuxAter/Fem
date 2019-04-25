@@ -2,8 +2,8 @@
 #define ARTA_ARGPARSE_HPP_
 
 #include <map>
-#include <tuple>
 #include <string>
+#include <tuple>
 #include <vector>
 
 namespace arta {
@@ -15,8 +15,12 @@ namespace argparse {
     inline double getf(const std::string& n) {
       return std::atof(options[n].c_str());
     }
-    inline double geti(const std::string& n) {
+    inline int geti(const std::string& n) {
       return std::atoi(options[n].c_str());
+    }
+    inline unsigned geth(const std::string& n) {
+      char* ptr;
+      return std::strtoul(options[n].c_str(), &ptr, 16);
     }
   };
   class Parser {

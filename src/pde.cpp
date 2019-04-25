@@ -112,7 +112,12 @@ arta::linalg::Vector arta::PDE::solve_time_indep() {
   if (timer) {
     time::start();
   }
-  U_ = linalg::solve(M_, F_, F_.size());
+  if (access((dest_dir + "U.vec").c_str(), F_OK) != -1) {
+    U_ = linalg::load_vec_from_file(dest_dir + "U.vec");
+  } else {
+    U_ = linalg::solve(M_, F_, F_.size());
+    linalg::save_vec_to_file(dest_dir + "U.vec", U_);
+  }
   if (timer) {
     log::status("Solving Time Indep: %f", time::stop());
   }

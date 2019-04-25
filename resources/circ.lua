@@ -9,5 +9,5 @@ C = 0
 bndry = {}
 
 function force(x, y)
-  return 1/((x*x)+(y*y)+1)
+  return math.sin(x)*math.sin(y)
 end
