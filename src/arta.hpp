@@ -2,7 +2,8 @@
 #define ARTA_HPP_
 
 #define ARTA_VERSION_MAJOR 3
-#define ARTA_VERSION_MINOR 3
+#define ARTA_VERSION_MINOR 4
+#define ARTA_THREAD_MAX 8
 
 #include "logger.hpp"
 #include "script.hpp"

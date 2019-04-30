@@ -1,6 +1,6 @@
 mesh = "../pslg/rect.poly"
 mesh_angle = 20
-mesh_area = 0.01
+mesh_area = 0.6
 
 A = {{1, 0}, {0, 1}}
 B = {1, 1}
@@ -8,12 +8,16 @@ C = 1
 
 bndry = {}
 
-function bndry_func(x, y)
-  return x ^ 3 - 3 * x * y ^ 2
+dt = 0.1
+tmax = 1.0
+
+function init(x, y)
+  if (math.abs(x) <= 0.2 and math.abs(y) <= 0.2) then
+    return 10.0
+  end
+  return 0.0
 end
 
-bndry[0] = bndry_func
-
 function force(x, y)
-  return 3 * x ^ 2 - 3 * y ^ 2 - 6 * x * y + x ^ 3 - 3 * x * y ^ 2
+  return 0.0
 end

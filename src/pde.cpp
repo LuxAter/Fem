@@ -9,15 +9,24 @@
 #include "linalg.hpp"
 #include "logger.hpp"
 #include "mesh.hpp"
+#include "plot.hpp"
+#include "print.hpp"
 #include "script.hpp"
 #include "timer.hpp"
+
+#include <iostream>
 
 arta::PDE::PDE() : script_source() {}
 arta::PDE::PDE(argparse::Arguments args)
     : script_source(args.options["script"]),
       mesh_source(args.options["mesh"]),
       mesh_constraints({{args.getf("mesh-area"), args.getf("mesh-angle")}}),
-      timer(args.flags["time"]) {
+      timer(args.flags["time"]),
+      save(!args.flags["no-save"]),
+      w(args.geti("res")),
+      h(args.geti("res")),
+      bg(args.geth("bg")),
+      cmap(args.options["cmap"]) {
   load_script();
   load_mesh();
   construct_matrices();
@@ -73,8 +82,10 @@ void arta::PDE::construct_matrices() {
         }
       }
     }
-    linalg::save_mat_to_file(dest_dir + "G.mat", G_);
-    linalg::save_mat_to_file(dest_dir + "M.mat", M_);
+    if (save) {
+      linalg::save_mat_to_file(dest_dir + "G.mat", G_);
+      linalg::save_mat_to_file(dest_dir + "M.mat", M_);
+    }
   }
   if (timer) {
     log::status("Construct Matricies: %f", time::stop());
@@ -101,10 +112,33 @@ void arta::PDE::construct_forcing(const double& t) {
                                  mesh.pts[i].y, time_);
       }
     }
-    linalg::save_vec_to_file(dest_dir + "F.vec", F_);
+    if (save) {
+      linalg::save_vec_to_file(dest_dir + "F.vec", F_);
+    }
   }
   if (timer) {
     log::status("Construct Forcing: %f", time::stop());
+  }
+}
+
+void arta::PDE::construct_init() {
+  time_ = 0.0;
+  if (timer) {
+    time::start();
+  }
+  if (access((dest_dir + "U0000.vec").c_str(), F_OK) != -1) {
+    U_ = linalg::load_vec_from_file(dest_dir + "U0000.vec");
+  } else {
+    U_ = linalg::Vector(mesh.pts.size(), 0.0);
+    for (unsigned long i = 0; i < mesh.pts.size(); ++i) {
+      U_[i] = script::init(mesh.pts[i].x, mesh.pts[i].y);
+    }
+    if (save) {
+      linalg::save_vec_to_file(dest_dir + "U0000.vec", U_);
+    }
+  }
+  if (timer) {
+    log::status("Construct Initial: %f", time::stop());
   }
 }
 
@@ -116,12 +150,45 @@ arta::linalg::Vector arta::PDE::solve_time_indep() {
     U_ = linalg::load_vec_from_file(dest_dir + "U.vec");
   } else {
     U_ = linalg::solve(M_, F_, F_.size());
-    linalg::save_vec_to_file(dest_dir + "U.vec", U_);
+    if (save) {
+      linalg::save_vec_to_file(dest_dir + "U.vec", U_);
+    }
   }
   if (timer) {
     log::status("Solving Time Indep: %f", time::stop());
   }
   return U_;
+}
+
+void arta::PDE::solve_time_dep() {
+  double dt = script::getd({"dt", "deltat", "delta_t"});
+  unsigned N =
+      static_cast<unsigned>(script::getd({"tmax", "t_max", "tm"}) / dt);
+  construct_init();
+  linalg::Matrix A = G_ + 0.5 * dt * M_;
+  linalg::Matrix B = G_ - 0.5 * dt * M_;
+  std::cout << G_.dump() << "\n\n" << M_.dump() << "\n\n" << (0.5*dt*M_).dump()
+    << "\n\n";
+  std::cout << A.dump() << "\n\n\n=====";
+  for (unsigned n = 0; n < N; ++n) {
+    plot_async(dest_dir + fmt_val(n) + ".png", U_, &mesh, w, h, cmap, bg);
+    linalg::Vector F_n = F_;
+    construct_forcing((n + 1) * dt);
+    if (access((dest_dir + "U" + fmt_val(n + 1) + ".vec").c_str(), F_OK) !=
+        -1) {
+      U_ = linalg::load_vec_from_file(dest_dir + "U" + arta::fmt_val(n + 1) +
+                                      ".vec");
+    } else {
+      linalg::Vector C = dt / 2.0 * (F_ + F_n);
+      linalg::Vector Q = B * U_ + C;
+      U_ = linalg::solve(A, Q);
+      std::cout << Q.dump() << "\n\n" << U_.dump() << "\n\n";
+      if (save) {
+        linalg::save_vec_to_file(dest_dir + "U" + arta::fmt_val(n + 1) + ".vec",
+                                 U_);
+      }
+    }
+  }
 }
 
 double arta::PDE::approx(const double& x, const double& y,
@@ -249,4 +316,13 @@ void arta::PDE::load_mesh() {
   } else {
     log::error("Must define a mesh file either by command line or by script.");
   }
+}
+
+double arta::approx(const double& x, const double& y, const unsigned& e,
+                    const linalg::Vector& U, const mesh::Mesh* mesh) {
+  double val = 0.0;
+  for (unsigned i = 0; i < U.size(); ++i) {
+    val += (U[i] * basis::global(mesh, x, y, i, e));
+  }
+  return val;
 }

@@ -48,6 +48,15 @@ bool arta::script::has(const std::string& var) {
   lua_pop(state_, -1);
   return res;
 }
+bool arta::script::has(const std::vector<std::string>& var) {
+  for (auto& it : var) {
+    lua_getglobal(state_, it.c_str());
+    bool res = !lua_isnil(state_, -1);
+    lua_pop(state_, -1);
+    if(res) return true;
+  }
+  return false;
+}
 
 double arta::script::A(const double& x, const double& y, const unsigned& i,
                        const unsigned& j) {
@@ -165,6 +174,20 @@ double arta::script::boundary(const unsigned& i, const double& x,
   lua_pop(state_, n);
   return val;
 }
+double arta::script::init(const double& x, const double& y) {
+  const char* alias[] = {"i", "init", "initial"};
+  for (unsigned i = 0; i < 3; ++i) {
+    lua_getglobal(state_, alias[i]);
+    if (!lua_isnil(state_, -1)) break;
+  }
+  if (lua_isnil(state_, -1)) return 0.0;
+  lua_pushnumber(state_, x);
+  lua_pushnumber(state_, y);
+  lua_call(state_, 2, 1);
+  double val = lua_tonumber(state_, -1);
+  lua_pop(state_, -1);
+  return val;
+}
 
 std::string arta::script::gets(const std::string& var) {
   std::string res = std::string();
@@ -183,6 +206,18 @@ double arta::script::getd(const std::string& var) {
     res = static_cast<double>(lua_tonumber(state_, -1));
   }
   lua_pop(state_, 1);
+  return res;
+}
+
+double arta::script::getd(const std::vector<std::string>& var) {
+  double res = double();
+  for (auto& it : var) {
+    lua_getglobal(state_, it.c_str());
+    if (lua_isnumber(state_, -1)) {
+      res = static_cast<double>(lua_tonumber(state_, -1));
+    }
+    lua_pop(state_, -1);
+  }
   return res;
 }
 

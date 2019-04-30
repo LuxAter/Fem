@@ -62,6 +62,10 @@ arta::linalg::Vector arta::linalg::conjugate_gradient(const Matrix& A,
 
 arta::linalg::Vector arta::linalg::solve(const Matrix& A, const Vector& b,
                                          const unsigned& n) {
+  // TODO Conjugate Gradient only works for symmetric and positive definite!
+  // Gauss-Seidel is working because it is diagonal dominant.
+  // I will need to use GMRES to solve it any faster. This means leaning more
+  // about the Krylov subspace, and the Arnoldi iterations.
   // return conjugate_gradient(A, b, n);
   return gauss_seidel(A, b, n);
 }

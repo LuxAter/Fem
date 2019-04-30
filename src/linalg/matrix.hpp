@@ -40,6 +40,10 @@ namespace linalg {
     std::vector<double> vals_;
   };
 
+  Matrix operator+(const Matrix& lhs, const Matrix& rhs);
+  Matrix operator-(const Matrix& lhs, const Matrix& rhs);
+
+  Matrix operator*(const double& lhs, const Matrix& rhs);
   Vector operator*(const Matrix& lhs, const Vector& rhs);
 
   void save_mat_to_file(const std::string& file_name, const Matrix& mat);

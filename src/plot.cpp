@@ -1,6 +1,7 @@
 #include "plot.hpp"
 
 #include <array>
+#include <future>
 #include <string>
 #include <vector>
 
@@ -10,9 +11,11 @@
 
 #include <png.h>
 
+#include "arta.hpp"
 #include "linalg.hpp"
 #include "logger.hpp"
 #include "mesh.hpp"
+#include "pde.hpp"
 #include "timer.hpp"
 
 #include "cmaps.hpp"
@@ -60,47 +63,95 @@ void arta::plot_grid(const std::string& dest, const unsigned& w,
   free(buffer);
 }
 
-void arta::plot(const std::string& dest, const PDE* pde, const unsigned& w,
-                const unsigned& h, std::string cmap, uint32_t bg) {
-  if (pde->timer) {
-    time::start();
-  }
+// void arta::plot(const std::string& dest, const PDE* pde, const unsigned& w,
+//                 const unsigned& h, std::string cmap, uint32_t bg) {
+//   if (pde->timer) {
+//     time::start();
+//   }
+//   std::vector<std::vector<double>> vals;
+//   double stepx = (pde->mesh.bounds[2] - pde->mesh.bounds[0]) / w;
+//   double stepy = (pde->mesh.bounds[3] - pde->mesh.bounds[1]) / h;
+//   for (double y = pde->mesh.bounds[1]; y < pde->mesh.bounds[3]; y += stepy) {
+//     vals.push_back(std::vector<double>());
+//     for (double x = pde->mesh.bounds[0]; x < pde->mesh.bounds[2]; x += stepx)
+//     {
+//       int t = pde->mesh.locate(x, y);
+//       if (t < 0) {
+//         vals.back().push_back(std::numeric_limits<double>::quiet_NaN());
+//         continue;
+//       }
+//       vals.back().push_back(pde->approx(x, y, t));
+//     }
+//   }
+//   if (pde->timer) {
+//     log::status("Evaluated Approximation: %f", time::stop());
+//     time::start();
+//   }
+//   plot_grid(dest, w, h, vals, cmap, bg);
+//   if (pde->timer) {
+//     log::status("Plot Approximation: %f", time::stop());
+//   }
+// }
+void arta::plot(const std::string& dest, const linalg::Vector& U,
+                const mesh::Mesh* mesh, const unsigned& w, const unsigned& h,
+                std::string cmap, uint32_t bg) {
   std::vector<std::vector<double>> vals;
-  double stepx = (pde->mesh.bounds[2] - pde->mesh.bounds[0]) / w;
-  double stepy = (pde->mesh.bounds[3] - pde->mesh.bounds[1]) / h;
-  for (double y = pde->mesh.bounds[1]; y < pde->mesh.bounds[3]; y += stepy) {
+  double stepx = (mesh->bounds[2] - mesh->bounds[0]) / w;
+  double stepy = (mesh->bounds[3] - mesh->bounds[1]) / h;
+  for (double y = mesh->bounds[1]; y < mesh->bounds[3]; y += stepy) {
     vals.push_back(std::vector<double>());
-    for (double x = pde->mesh.bounds[0]; x < pde->mesh.bounds[2]; x += stepx) {
-      int t = pde->mesh.locate(x, y);
+    for (double x = mesh->bounds[0]; x < mesh->bounds[2]; x += stepx) {
+      int t = mesh->locate(x, y);
       if (t < 0) {
         vals.back().push_back(std::numeric_limits<double>::quiet_NaN());
         continue;
       }
-      vals.back().push_back(pde->approx(x, y, t));
+      vals.back().push_back(approx(x, y, t, U, mesh));
     }
   }
-  if (pde->timer) {
-    log::status("Evaluated Approximation: %f", time::stop());
-    time::start();
-  }
   plot_grid(dest, w, h, vals, cmap, bg);
-  if (pde->timer) {
-    log::status("Plot Approximation: %f", time::stop());
-  }
 }
 
-void arta::plot_tri(const std::string& dest, const PDE* pde, const unsigned& w,
-                    const unsigned& h, std::string cmap, uint32_t bg) {
-  if (pde->timer) {
-    time::start();
-  }
+// void arta::plot_tri(const std::string& dest, const PDE* pde, const unsigned&
+// w,
+//                     const unsigned& h, std::string cmap, uint32_t bg) {
+//   if (pde->timer) {
+//     time::start();
+//   }
+//   std::vector<std::vector<double>> vals;
+//   double stepx = (pde->mesh.bounds[2] - pde->mesh.bounds[0]) / w;
+//   double stepy = (pde->mesh.bounds[3] - pde->mesh.bounds[1]) / h;
+//   for (double y = pde->mesh.bounds[1]; y < pde->mesh.bounds[3]; y += stepy) {
+//     vals.push_back(std::vector<double>());
+//     for (double x = pde->mesh.bounds[0]; x < pde->mesh.bounds[2]; x += stepx)
+//     {
+//       int t = pde->mesh.locate(x, y);
+//       if (t < 0) {
+//         vals.back().push_back(std::numeric_limits<double>::quiet_NaN());
+//         continue;
+//       }
+//       vals.back().push_back(t);
+//     }
+//   }
+//   if (pde->timer) {
+//     log::status("Evaluated Tris: %f", time::stop());
+//     time::start();
+//   }
+//   plot_grid(dest, w, h, vals, cmap, bg);
+//   if (pde->timer) {
+//     log::status("Plot Tris: %f", time::stop());
+//   }
+// }
+void arta::plot_tri(const std::string& dest, const mesh::Mesh* mesh,
+                    const unsigned& w, const unsigned& h, std::string cmap,
+                    uint32_t bg) {
   std::vector<std::vector<double>> vals;
-  double stepx = (pde->mesh.bounds[2] - pde->mesh.bounds[0]) / w;
-  double stepy = (pde->mesh.bounds[3] - pde->mesh.bounds[1]) / h;
-  for (double y = pde->mesh.bounds[1]; y < pde->mesh.bounds[3]; y += stepy) {
+  double stepx = (mesh->bounds[2] - mesh->bounds[0]) / w;
+  double stepy = (mesh->bounds[3] - mesh->bounds[1]) / h;
+  for (double y = mesh->bounds[1]; y < mesh->bounds[3]; y += stepy) {
     vals.push_back(std::vector<double>());
-    for (double x = pde->mesh.bounds[0]; x < pde->mesh.bounds[2]; x += stepx) {
-      int t = pde->mesh.locate(x, y);
+    for (double x = mesh->bounds[0]; x < mesh->bounds[2]; x += stepx) {
+      int t = mesh->locate(x, y);
       if (t < 0) {
         vals.back().push_back(std::numeric_limits<double>::quiet_NaN());
         continue;
@@ -108,14 +159,7 @@ void arta::plot_tri(const std::string& dest, const PDE* pde, const unsigned& w,
       vals.back().push_back(t);
     }
   }
-  if (pde->timer) {
-    log::status("Evaluated Tris: %f", time::stop());
-    time::start();
-  }
   plot_grid(dest, w, h, vals, cmap, bg);
-  if (pde->timer) {
-    log::status("Plot Tris: %f", time::stop());
-  }
 }
 
 void arta::write_bmp(const std::string& file, uint32_t** buffer, unsigned w,
@@ -228,4 +272,23 @@ double arta::clamp(double val, double in_min, double in_max, double out_min,
   else if (val >= in_max)
     return out_max;
   return out_min + ((out_max - out_min) / (in_max - in_min)) * (val - in_min);
+}
+
+static std::vector<std::future<void>> plot_threads_;
+
+void arta::plot_async(const std::string& dest, const linalg::Vector U,
+                      const mesh::Mesh* mesh, const unsigned& w,
+                      const unsigned& h, std::string cmap, uint32_t bg) {
+  if (plot_threads_.size() > ARTA_THREAD_MAX) {
+    plot_threads_[0].get();
+    plot_threads_.erase(plot_threads_.begin());
+  }
+  plot_threads_.push_back(
+      std::async(arta::plot, dest, U, mesh, w, h, cmap, bg));
+}
+void arta::plot_join() {
+  for (auto& it : plot_threads_) {
+    it.get();
+  }
+  plot_threads_.clear();
 }

@@ -44,7 +44,8 @@ double& arta::linalg::Matrix::operator()(unsigned long r, unsigned long c) {
     return vals_[row_ptr_[r + 1] - 1];
   }
 }
-double arta::linalg::Matrix::operator()(unsigned long r, unsigned long c) const {
+double arta::linalg::Matrix::operator()(unsigned long r,
+                                        unsigned long c) const {
   if (row_ptr_[r + 1] - row_ptr_[r] == 0) {
     return 0.0;
   } else {
@@ -69,7 +70,7 @@ double arta::linalg::Matrix::at(unsigned long r, unsigned long c) const {
   }
 }
 void arta::linalg::Matrix::set(unsigned long r, unsigned long c,
-                             const double& val) {
+                               const double& val) {
   if (row_ptr_[r + 1] - row_ptr_[r] == 0) {
     if (val != 0) {
       vals_.insert(vals_.begin() + row_ptr_[r + 1], val);
@@ -125,7 +126,37 @@ std::string arta::linalg::Matrix::dump() const {
   return str;
 }
 
-arta::linalg::Vector arta::linalg::operator*(const Matrix& lhs, const Vector& rhs) {
+arta::linalg::Matrix arta::linalg::operator+(const Matrix& lhs,
+                                             const Matrix& rhs) {
+  Matrix res(lhs);
+  for (unsigned long r = 0; r < res.size(); ++r) {
+    for (unsigned long c = 0; c < res.size(); ++c){
+      res.set(r, c, res.at(r, c) + rhs.at(r,c));
+    }
+  }
+  return res;
+}
+arta::linalg::Matrix arta::linalg::operator-(const Matrix& lhs,
+                                             const Matrix& rhs) {
+  Matrix res(lhs);
+  for (unsigned long r = 0; r < res.size(); ++r) {
+    for (unsigned long c = 0; c < res.size(); ++c){
+      res.set(r, c, res.at(r, c) - rhs.at(r,c));
+    }
+  }
+  return res;
+}
+arta::linalg::Matrix arta::linalg::operator*(const double& lhs,
+                                             const Matrix& rhs) {
+  Matrix res(rhs);
+  for (unsigned long i = 0; i < res.count(); ++i) {
+    res.get_vals()->at(i) *= lhs;
+  }
+  return res;
+}
+
+arta::linalg::Vector arta::linalg::operator*(const Matrix& lhs,
+                                             const Vector& rhs) {
   Vector res(lhs.size());
   for (unsigned long r = 0; r < lhs.size(); ++r) {
     double sum = 0.0;
@@ -138,7 +169,7 @@ arta::linalg::Vector arta::linalg::operator*(const Matrix& lhs, const Vector& rh
 }
 
 void arta::linalg::save_mat_to_file(const std::string& file_name,
-                                  const Matrix& mat) {
+                                    const Matrix& mat) {
   FILE* out = fopen(file_name.c_str(), "w");
   if (!out) {
     log::warning("Failed to open file \"%s\"", file_name.c_str());

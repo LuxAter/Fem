@@ -22,8 +22,11 @@ class PDE {
 
   void construct_matrices();
   void construct_forcing(const double& t);
+  void construct_init();
 
   linalg::Vector solve_time_indep();
+
+  void solve_time_dep();
 
   double approx(const double& x, const double& y, const unsigned& e) const;
 
@@ -55,11 +58,18 @@ class PDE {
   mesh::Mesh mesh;
 
   bool timer = false;
+  bool save = true;
+  unsigned w, h;
+  uint32_t bg;
+  std::string cmap;
 
  private:
   void load_script();
   void load_mesh();
 };
+
+double approx(const double& x, const double& y, const unsigned& e,
+              const linalg::Vector& U, const mesh::Mesh* mesh);
 }  // namespace arta
 
 #endif  // ARTA_PDE_HPP_

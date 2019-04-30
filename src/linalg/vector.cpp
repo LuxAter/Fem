@@ -26,7 +26,7 @@ std::string arta::linalg::Vector::dump() const {
 }
 
 void arta::linalg::save_vec_to_file(const std::string& file_name,
-                                  const Vector& vec) {
+                                    const Vector& vec) {
   FILE* out = fopen(file_name.c_str(), "w");
   if (!out) {
     log::warning("Failed to open file \"%s\"", file_name.c_str());
@@ -56,24 +56,35 @@ arta::linalg::Vector arta::linalg::load_vec_from_file(
   return vec;
 }
 
-arta::linalg::Vector arta::linalg::operator+(const Vector& lhs, const Vector& rhs) {
+arta::linalg::Vector arta::linalg::operator+(const Vector& lhs,
+                                             const Vector& rhs) {
   Vector vec(std::min(lhs.size(), rhs.size()));
   for (unsigned long i = 0; i < vec.size(); ++i) {
     vec.set(i, lhs.at(i) + rhs.at(i));
   }
   return vec;
 }
-arta::linalg::Vector arta::linalg::operator-(const Vector& lhs, const Vector& rhs) {
+arta::linalg::Vector arta::linalg::operator-(const Vector& lhs,
+                                             const Vector& rhs) {
   Vector vec(std::min(lhs.size(), rhs.size()));
   for (unsigned long i = 0; i < vec.size(); ++i) {
     vec.set(i, lhs.at(i) - rhs.at(i));
   }
   return vec;
 }
-arta::linalg::Vector arta::linalg::operator*(const Vector& lhs, const double& rhs) {
+arta::linalg::Vector arta::linalg::operator*(const Vector& lhs,
+                                             const double& rhs) {
   Vector vec(lhs.size());
   for (unsigned long i = 0; i < vec.size(); ++i) {
     vec.set(i, lhs.at(i) * rhs);
+  }
+  return vec;
+}
+arta::linalg::Vector arta::linalg::operator*(const double& lhs,
+                                             const Vector& rhs) {
+  Vector vec(rhs.size());
+  for (unsigned long i = 0; i < vec.size(); ++i) {
+    vec.set(i, rhs.at(i) * lhs);
   }
   return vec;
 }
