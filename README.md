@@ -68,3 +68,9 @@ To run the script with a script file ``test.lua``, simply execute
 
 Any other command line options, can be found by using the built in help
 documentation with the program.
+
+### PSLG ###
+
+The scripts require the definition of what source file to use for the
+mesh. This is in the form of a PSLG. To generate a PSLG, one can
+use the provided PSLG script, which requires a python3 interpreter.
