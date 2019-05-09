@@ -16,6 +16,8 @@
 #include "logger.hpp"
 #include "mesh.hpp"
 #include "pde.hpp"
+#include "print.hpp"
+#include "script.hpp"
 #include "timer.hpp"
 
 #include "cmaps.hpp"
@@ -23,15 +25,14 @@
 void arta::plot_grid(const std::string& dest, const unsigned& w,
                      const unsigned& h,
                      const std::vector<std::vector<double>>& vals,
-                     std::string cmap, uint32_t bg) {
+                     std::string cmap, uint32_t bg, double v_min,
+                     double v_max) {
   std::array<unsigned, 256> color_map = _cmaps[cmap];
   uint32_t** buffer = (uint32_t**)malloc(h * sizeof(uint32_t*));
   for (unsigned i = 0; i < h; ++i) {
     buffer[i] = (uint32_t*)malloc(w * sizeof(uint32_t));
   }
 
-  double v_min = std::numeric_limits<double>::infinity();
-  double v_max = -std::numeric_limits<double>::infinity();
   for (auto& row : vals) {
     for (auto& val : row) {
       if (std::isnan(val)) continue;
@@ -94,7 +95,7 @@ void arta::plot_grid(const std::string& dest, const unsigned& w,
 // }
 void arta::plot(const std::string& dest, const linalg::Vector& U,
                 const mesh::Mesh* mesh, const unsigned& w, const unsigned& h,
-                std::string cmap, uint32_t bg) {
+                std::string cmap, uint32_t bg, double v_min, double v_max) {
   std::vector<std::vector<double>> vals;
   double stepx = (mesh->bounds[2] - mesh->bounds[0]) / w;
   double stepy = (mesh->bounds[3] - mesh->bounds[1]) / h;
@@ -109,7 +110,7 @@ void arta::plot(const std::string& dest, const linalg::Vector& U,
       vals.back().push_back(approx(x, y, t, U, mesh));
     }
   }
-  plot_grid(dest, w, h, vals, cmap, bg);
+  plot_grid(dest, w, h, vals, cmap, bg, v_min, v_max);
 }
 
 // void arta::plot_tri(const std::string& dest, const PDE* pde, const unsigned&
@@ -157,6 +158,25 @@ void arta::plot_tri(const std::string& dest, const mesh::Mesh* mesh,
         continue;
       }
       vals.back().push_back(t);
+    }
+  }
+  plot_grid(dest, w, h, vals, cmap, bg);
+}
+void arta::plot_func(const std::string& dest, const std::string& func,
+                     const mesh::Mesh* mesh, const unsigned& w,
+                     const unsigned& h, std::string cmap, uint32_t bg) {
+  std::vector<std::vector<double>> vals;
+  double stepx = (mesh->bounds[2] - mesh->bounds[0]) / w;
+  double stepy = (mesh->bounds[3] - mesh->bounds[1]) / h;
+  for (double y = mesh->bounds[1]; y < mesh->bounds[3]; y += stepy) {
+    vals.push_back(std::vector<double>());
+    for (double x = mesh->bounds[0]; x < mesh->bounds[2]; x += stepx) {
+      int t = mesh->locate(x, y);
+      if (t < 0) {
+        vals.back().push_back(std::numeric_limits<double>::quiet_NaN());
+        continue;
+      }
+      vals.back().push_back(script::call(func, x, y));
     }
   }
   plot_grid(dest, w, h, vals, cmap, bg);
@@ -283,8 +303,31 @@ void arta::plot_async(const std::string& dest, const linalg::Vector U,
     plot_threads_[0].get();
     plot_threads_.erase(plot_threads_.begin());
   }
-  plot_threads_.push_back(
-      std::async(arta::plot, dest, U, mesh, w, h, cmap, bg));
+  plot_threads_.push_back(std::async(arta::plot, dest, U, mesh, w, h, cmap, bg,
+                                     std::numeric_limits<double>::infinity(),
+                                     -std::numeric_limits<double>::infinity()));
+}
+void arta::plot_async(const std::string& dest,
+                      const std::vector<linalg::Vector> U,
+                      const mesh::Mesh* mesh, const unsigned& w,
+                      const unsigned& h, std::string cmap, uint32_t bg) {
+  double v_min = std::numeric_limits<double>::infinity();
+  double v_max = -std::numeric_limits<double>::infinity();
+  for (std::size_t i = 0; i < U.size(); ++i) {
+    for (std::size_t j = 0; j < U[i].size(); ++j) {
+      v_min = std::min(v_min, U[i][j]);
+      v_max = std::max(v_max, U[i][j]);
+    }
+  }
+  for (std::size_t i = 0; i < U.size(); ++i) {
+    if (plot_threads_.size() > ARTA_THREAD_MAX) {
+      plot_threads_[0].get();
+      plot_threads_.erase(plot_threads_.begin());
+    }
+    plot_threads_.push_back(std::async(
+        arta::plot, dest + fmt_val(static_cast<unsigned>(i)) + ".png", U[i],
+        mesh, w, h, cmap, bg, v_min, v_max));
+  }
 }
 void arta::plot_join() {
   for (auto& it : plot_threads_) {

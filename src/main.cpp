@@ -15,6 +15,7 @@ int main(int argc, char* argv[]) {
   parser.add_option('q', "mesh-angle", "-1", "Mesh minimum triangle angle");
   parser.add_option('c', "cmap", "parula", "Plot color map basis");
   parser.add_option('b', "bg", "0xFFFFFF", "Plot background color");
+  parser.add_option('f', "func", "", "Plot additional function");
   parser.add_flag('n', "no-save", "Disables tool file saving");
   auto args = parser.parse_args(argc, argv);
   std::vector<double> times;
@@ -29,15 +30,39 @@ int main(int argc, char* argv[]) {
   arta::PDE pde(args);
   arta::plot_tri(pde.dest_dir + "tri.png", &(pde.mesh), args.geti("res"),
                  args.geti("res"), args.options["cmap"], args.geth("bg"));
+  if (args.options["func"] != "") {
+    arta::plot_func(pde.dest_dir + "func.png", args.options["func"],
+                    &(pde.mesh), args.geti("res"), args.geti("res"),
+                    args.options["cmap"], args.geth("bg"));
+  }
   if (arta::script::has({"i", "init", "inital"})) {
     pde.solve_time_dep();
   } else {
     pde.solve_time_indep();
+    arta::plot_async(pde.dest_dir + "approx.png", pde.U_, &(pde.mesh),
+                     args.geti("res"), args.geti("res"), args.options["cmap"],
+                     args.geth("bg"));
+    if (args.options["func"] != "") {
+      double err = 0.0;
+      double stepx =
+          (pde.mesh.bounds[2] - pde.mesh.bounds[0]) / args.geti("res");
+      double stepy =
+          (pde.mesh.bounds[3] - pde.mesh.bounds[1]) / args.geti("res");
+      for (double y = pde.mesh.bounds[1]; y < pde.mesh.bounds[3]; y += stepy) {
+        for (double x = pde.mesh.bounds[0]; x < pde.mesh.bounds[2];
+             x += stepx) {
+          int t = pde.mesh.locate(x, y);
+          if (t < 0) {
+            continue;
+          }
+          err = std::max(
+              err, std::abs(arta::script::call(args.options["func"], x, y) -
+                            arta::approx(x, y, t, pde.U_, &(pde.mesh))));
+        }
+      }
+      arta::log::info("ERROR: %lf", err);
+    }
   }
-  arta::log::status("PLOTTING");
-  // arta::plot_async(pde.dest_dir + "approx.png", pde.U_, &(pde.mesh),
-  //                  args.geti("res"), args.geti("res"), args.options["cmap"],
-  //                  args.geth("bg"));
   arta::plot_join();
   arta::log::success("DONE");
   return 0;

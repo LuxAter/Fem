@@ -1,14 +1,14 @@
-mesh = "../pslg/rect.poly"
+mesh = "../pslg/trial.poly"
 mesh_angle = 20
-mesh_area = 0.1
+mesh_area = 5.0
 
 A = {{1, 0}, {0, 1}}
-B = {0, 0}
-C = 0
+B = {1, 1}
+C = 1
 
 bndry = {}
 
-dt = 0.1
+dt = 0.05
 tmax = 1.0
 
 function init(x, y)

@@ -36,6 +36,8 @@ namespace script {
   double getd(const std::string& var);
   double getd(const std::vector<std::string>& var);
 
+  double call(const std::string& func, const double &x, const double& y);
+
   std::string get_file_name();
 }  // namespace script
 }  // namespace arta

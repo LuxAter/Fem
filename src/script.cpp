@@ -221,4 +221,15 @@ double arta::script::getd(const std::vector<std::string>& var) {
   return res;
 }
 
+double arta::script::call(const std::string& func, const double &x, const double& y){
+  lua_getglobal(state_, func.c_str());
+  if (lua_isnil(state_, -1)) return 0.0;
+  lua_pushnumber(state_, x);
+  lua_pushnumber(state_, y);
+  lua_call(state_, 2, 1);
+  double val = lua_tonumber(state_, -1);
+  lua_pop(state_, -1);
+  return val;
+}
+
 std::string arta::script::get_file_name() { return file_name_; }

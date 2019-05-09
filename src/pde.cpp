@@ -71,17 +71,17 @@ void arta::PDE::construct_matrices() {
         }
       }
     }
-    for (unsigned i = 0; i < mesh.pts.size(); ++i) {
-      if (mesh.is_boundary(i)) {
-        for (unsigned j = 0; j < mesh.pts.size(); ++j) {
-          if (i == j) {
-            M_.set(i, j, 1.0);
-          } else {
-            M_.set(i, j, 0.0);
-          }
-        }
-      }
-    }
+    // for (unsigned i = 0; i < mesh.pts.size(); ++i) {
+    //   if (mesh.is_boundary(i)) {
+    //     for (unsigned j = 0; j < mesh.pts.size(); ++j) {
+    //       if (i == j) {
+    //         M_.set(i, j, 1.0);
+    //       } else {
+    //         M_.set(i, j, 0.0);
+    //       }
+    //     }
+    //   }
+    // }
     if (save) {
       linalg::save_mat_to_file(dest_dir + "G.mat", G_);
       linalg::save_mat_to_file(dest_dir + "M.mat", M_);
@@ -106,12 +106,12 @@ void arta::PDE::construct_forcing(const double& t) {
         F_[mesh.tri[ele][i]] += calc::integrate(F(ele, i, time_), ele, &mesh);
       }
     }
-    for (unsigned i = 0; i < mesh.pts.size(); ++i) {
-      if (mesh.is_boundary(i)) {
-        F_[i] = script::boundary(mesh.bdry_index[i], mesh.pts[i].x,
-                                 mesh.pts[i].y, time_);
-      }
-    }
+    // for (unsigned i = 0; i < mesh.pts.size(); ++i) {
+    //   if (mesh.is_boundary(i)) {
+    //     F_[i] = script::boundary(mesh.bdry_index[i], mesh.pts[i].x,
+    //                              mesh.pts[i].y, time_);
+    //   }
+    // }
     if (save) {
       linalg::save_vec_to_file(dest_dir + "F.vec", F_);
     }
@@ -142,7 +142,32 @@ void arta::PDE::construct_init() {
   }
 }
 
+void arta::PDE::apply_bc(linalg::Matrix& A) {
+  for (unsigned i = 0; i < mesh.pts.size(); ++i) {
+    if (mesh.is_boundary(i)) {
+      for (unsigned j = 0; j < mesh.pts.size(); ++j) {
+        if (i == j) {
+          A.set(i, j, 1.0);
+        } else {
+          A.set(i, j, 0.0);
+        }
+      }
+    }
+  }
+}
+
+void arta::PDE::apply_bc(linalg::Vector& b) {
+  for (unsigned i = 0; i < mesh.pts.size(); ++i) {
+    if (mesh.is_boundary(i)) {
+      b[i] = script::boundary(mesh.bdry_index[i], mesh.pts[i].x, mesh.pts[i].y,
+                              time_);
+    }
+  }
+}
+
 arta::linalg::Vector arta::PDE::solve_time_indep() {
+  apply_bc(M_);
+  apply_bc(F_);
   if (timer) {
     time::start();
   }
@@ -167,13 +192,18 @@ void arta::PDE::solve_time_dep() {
   construct_init();
   linalg::Matrix A = G_ + 0.5 * dt * M_;
   linalg::Matrix B = G_ - 0.5 * dt * M_;
-  std::cout << G_.dump() << "\n\n" << M_.dump() << "\n\n" << (0.5*dt*M_).dump()
-    << "\n\n";
-  std::cout << A.dump() << "\n\n\n=====";
+  std::cout << G_.dump() << "\n\n"
+            << M_.dump() << "\n\n"
+            << (0.5 * dt * M_).dump() << "\n\n";
+  std::cout << A.dump() << "\n\n\n=====\n";
+  std::cout << B.dump() << "\n\n\n=====\n";
+  apply_bc(A);
+  std::vector<linalg::Vector> apxs;
   for (unsigned n = 0; n < N; ++n) {
-    plot_async(dest_dir + fmt_val(n) + ".png", U_, &mesh, w, h, cmap, bg);
+    // plot_async(dest_dir + fmt_val(n) + ".png", U_, &mesh, w, h, cmap, bg);
     linalg::Vector F_n = F_;
     construct_forcing((n + 1) * dt);
+    apxs.push_back(U_);
     if (access((dest_dir + "U" + fmt_val(n + 1) + ".vec").c_str(), F_OK) !=
         -1) {
       U_ = linalg::load_vec_from_file(dest_dir + "U" + arta::fmt_val(n + 1) +
@@ -181,6 +211,7 @@ void arta::PDE::solve_time_dep() {
     } else {
       linalg::Vector C = dt / 2.0 * (F_ + F_n);
       linalg::Vector Q = B * U_ + C;
+      apply_bc(Q);
       U_ = linalg::solve(A, Q);
       std::cout << Q.dump() << "\n\n" << U_.dump() << "\n\n";
       if (save) {
@@ -189,6 +220,7 @@ void arta::PDE::solve_time_dep() {
       }
     }
   }
+  plot_async(dest_dir, apxs, &mesh, w, h, cmap, bg);
 }
 
 double arta::PDE::approx(const double& x, const double& y,

@@ -24,6 +24,9 @@ class PDE {
   void construct_forcing(const double& t);
   void construct_init();
 
+  void apply_bc(linalg::Matrix& A);
+  void apply_bc(linalg::Vector& b);
+
   linalg::Vector solve_time_indep();
 
   void solve_time_dep();
