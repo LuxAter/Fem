@@ -1,6 +1,6 @@
 mesh = "../pslg/rect.poly"
 mesh_angle = 20
-mesh_area = 0.05
+mesh_area = 0.08666
 
 A = {{1, 0}, {0, 1}}
 B = {0, 0}

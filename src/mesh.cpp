@@ -143,8 +143,9 @@ bool arta::mesh::Mesh::is_boundary(const unsigned& e) const {
 void arta::mesh::construct_mesh(const std::string& source,
                                 const std::string& dest, const double& area,
                                 const double& angle) {
-  std::string command = "../triangle -pzn -a" + std::to_string(area) + " -q" +
-                        std::to_string(angle) + " " + source + " >/dev/null";
+  std::string command = "../thirdparty/triangle/triangle -pzn -a" +
+                        std::to_string(area) + " -q" + std::to_string(angle) +
+                        " " + source + " >/dev/null";
   log::info("Executing \"%s\"", command.c_str());
   if (std::system(command.c_str()) != 0) {
     log::warning("Failed to execute \"%s\"", command.c_str());

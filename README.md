@@ -5,6 +5,11 @@ C++ and has a user interface written in Lua.
 
 ## Install ##
 
+First clone this repository, by
+```fish
+git clone https://github.com/LuxAtrumStudio/Fem --recurse-submodules
+```
+
 ### Requirements ###
 
 To compile, one needs a modern C++ compiler, libpng, and liblua installed.

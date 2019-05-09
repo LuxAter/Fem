@@ -4,11 +4,11 @@ project(Arta)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
+add_custom_target(triangle COMMAND make WORKING_DIRECTORY
+  "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/triangle")
+
 find_package(Threads REQUIRED)
 link_libraries(${CMAKE_THREAD_LIBS_INIT})
-find_package(PythonLibs REQUIRED)
-include_directories(${PYTHON_INCLUDE_DIRS})
-link_libraries(${PYTHON_LIBRARIES})
 find_package(Lua REQUIRED)
 include_directories(${LUA_INCLUDE_DIRS})
 link_libraries(${LUA_LIBRARIES})
@@ -22,3 +22,4 @@ add_library(arta ${lib_src})
 
 add_executable(arta.exe "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 target_link_libraries(arta.exe arta)
+add_dependencies(arta.exe triangle)
