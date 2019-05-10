@@ -25,7 +25,7 @@ brew install libpng lua cmake
 
 ```fish
 sudo apt install libpng lua cmake
-```
+``
 
 ### Compile ###
 
@@ -35,13 +35,6 @@ To compile inter the floowing instructions
 mkdir build && cd build
 cmake ..
 make
-```
-
-### Installing ###
-
-To install the binary, run
-```fish
-sudo make install
 ```
 
 ## Usage ##
