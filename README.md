@@ -25,7 +25,7 @@ brew install libpng lua cmake
 
 ```fish
 sudo apt install libpng lua cmake
-``
+```
 
 ### Compile ###
 
